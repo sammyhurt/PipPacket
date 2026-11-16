@@ -26,7 +26,7 @@ export function Home() {
   const band = bandById(p.band);
   const young = p.band === "11-13";
   const lessons = allLessons;
-  const next = lessonById(upNext(p, 1)[0]?.lesson || "");
+  const next = lessonById(upNext(p, 8).find((x) => x.lesson)?.lesson || "");
   const mastery = counts(p);
   const dueToday = dueSkills(p);
   const doneCount = lessons.filter((l) => isDone(p, l.id)).length;
@@ -88,10 +88,10 @@ export function Home() {
             <p className="mt-1 text-xl font-bold">{dueToday ? `${dueToday} skill${dueToday === 1 ? "" : "s"} to practise` : "Mixed practice"}</p>
             <p className="text-soft mt-1 text-sm">{dueToday ? `Eight mixed questions, aimed at what you're weakest on.${due ? ` ${due} flashcard${due === 1 ? "" : "s"} due too.` : ""}` : "Finish a stop and its skill joins your daily mix."}</p>
           </button>
-          <button type="button" onClick={() => go(young ? "practice-binary" : "practice-subnet")} className="chunk press bg-pink/40 p-5 text-left">
-            <Eyebrow>Quick drill</Eyebrow>
-            <p className="mt-1 text-xl font-bold">{young ? "Binary switches" : "Subnetting trainer"}</p>
-            <p className="text-soft mt-1 text-sm">{young ? "Flip eight switches to make a number." : "Endless addresses, with the working shown."}</p>
+          <button type="button" onClick={() => go("lab")} className="chunk press bg-pink/40 p-5 text-left">
+            <Eyebrow>Lab</Eyebrow>
+            <p className="mt-1 text-xl font-bold">Build it and fix it</p>
+            <p className="text-soft mt-1 text-sm">Cable a network, configure a switch, and watch your message travel.</p>
           </button>
         </div>
       </section>
@@ -216,7 +216,7 @@ export function MapPage() {
   const [level, setLevel] = useState<Level>(base === 4 && foundationsDone ? 5 : base);
   const next = upNext(p, 3);
   const c = counts(p);
-  const openSkill = (x: Skill) => go(x.lesson ? "lesson-" + x.lesson : "play-" + x.activity);
+  const openSkill = (x: Skill) => go(x.lesson ? "lesson-" + x.lesson : x.lab ? "lab-" + x.lab : "play-" + x.activity);
   return (
     <div className={cn(wrap, "py-6 sm:py-8")}>
       <Title as="h1" eyebrow="Learn">
@@ -340,6 +340,7 @@ export function MapPage() {
                           <span className={cn("block leading-snug font-semibold", !isReady(x) && "text-soft")}>{x.title}</span>
                           <span className="text-soft block text-xs">
                             {isReady(x) ? stateName[st] : "Being written"}
+                            {x.lab && !x.lesson ? " · lab mission" : ""}
                             {x.topic ? ` · ${x.topic}` : ""}
                             {wait ? ` · best after “${x.after![0]}”` : ""}
                           </span>

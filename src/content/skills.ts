@@ -17,6 +17,7 @@ export interface Skill {
   title: string;
   lesson?: string; // the lesson that teaches it
   activity?: string; // or the kids' activity
+  lab?: string; // or a lab mission that both teaches and tests it
   topic?: string; // the official exam topic or domain it serves
   after?: string[]; // skills worth doing first
 }
@@ -89,10 +90,10 @@ export const skills: Skill[] = [
     ["Passing a note along the row"],
     ["Sorting messages to the right desk"],
     ["How a switch knows where devices are", "Why networks are split into groups"],
-    [["How a switch learns", { lesson: "how-a-switch-learns" }], "What a VLAN is", "Broadcasts and why they matter"],
+    [["How a switch learns", { lesson: "how-a-switch-learns" }], ["What a VLAN is", { lab: "two-departments" }], "Broadcasts and why they matter"],
     [
-      ["VLANs and access ports", { topic: D2, after: ["What a VLAN is"] }],
-      ["Trunks", { topic: D2, after: ["VLANs and access ports"] }],
+      ["VLANs and access ports", { topic: D2, lab: "two-departments", after: ["How a switch learns"] }],
+      ["Trunks", { topic: D2, lab: "wire-the-school", after: ["VLANs and access ports"] }],
       ["EtherChannel", { topic: D2, after: ["Trunks"] }],
       ["SVIs and routing between VLANs", { topic: D2, after: ["Trunks"] }],
       ["Edge ports for PCs, phones and access points", { topic: D2 }],
@@ -143,7 +144,7 @@ export const skills: Skill[] = [
     ["Doing steps in order", "Spotting what is broken"],
     ["Giving exact instructions", "Test, then fix"],
     ["A troubleshooting method", "Reading error messages"],
-    ["The command line: first steps", "Ping and traceroute"],
+    [["The command line: first steps", { lab: "fix-the-port" }], "Ping and traceroute"],
     [
       ["Getting a client online: Windows, macOS and Linux", { lesson: "client-connectivity", topic: "CCNA 2.0 · 1.6" }],
       ["Troubleshooting with show, ping, traceroute and capture", { topic: D2 }],
@@ -174,7 +175,7 @@ export const skills: Skill[] = [
   ]),
 ];
 
-export const isReady = (s: Skill) => !!(s.lesson || s.activity);
+export const isReady = (s: Skill) => !!(s.lesson || s.activity || s.lab);
 export const skillOfLesson = (lessonId: string) => skills.find((s) => s.lesson === lessonId);
 export const skillOfActivity = (id: string) => skills.find((s) => s.activity === id);
 export const skillByTitle = (title: string) => skills.find((s) => s.title === title);

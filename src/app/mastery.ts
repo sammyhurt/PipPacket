@@ -47,7 +47,7 @@ const met = (p: Progress, s: Skill) => (s.after || []).every((t) => { const pre 
 /** What to do next: skills that slipped first, then new ones in order, lowest level first, from the learner's level up. */
 export function upNext(p: Progress, count = 3): Skill[] {
   const from = startLevel(p.band);
-  const open = skills.filter((s) => s.lesson && s.level >= Math.min(from, 4));
+  const open = skills.filter((s) => (s.lesson || s.lab) && s.level >= Math.min(from, 4));
   const review = open.filter((s) => stateOf(p, s) === "review");
   const fresh = open.filter((s) => stateOf(p, s) === "new" && met(p, s)).sort((a, b) => a.level - b.level);
   const blocked = open.filter((s) => stateOf(p, s) === "new" && !met(p, s));
@@ -69,6 +69,13 @@ export function todaysQuestions(p: Progress, count = 8) {
 }
 /** How many started skills are due for practice today. */
 export const dueSkills = (p: Progress) => skills.filter((s) => s.lesson && ["review", "practising"].includes(stateOf(p, s))).length;
+/** Finishing a lab mission is evidence for every skill it exercises. */
+export function noteLab(titles: string[]) {
+  for (const t of titles) {
+    const s = skillByTitle(t);
+    if (s) actions.evidence(s.id, true);
+  }
+}
 export function counts(p: Progress, list: Skill[] = skills) {
   const c = { mastered: 0, practising: 0, review: 0, ready: 0, total: list.length };
   for (const s of list) {
