@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { kidActivities, type KidActivity } from "@/content/kids";
 import { cn } from "@/lib/utils";
 
+import { noteActivity } from "./mastery";
 import { go } from "./router";
 import { actions, useProgress } from "./store";
 import { Arrow, Btn, Check, Pip } from "./ui";
@@ -117,7 +118,7 @@ export function PipGame() {
     if (hop === 2) {
       setHop(0);
       setStep(second ? 4 : 2);
-      if (second) actions.star("pip", 3);
+      if (second) (actions.star("pip", 3), noteActivity("pip"));
     } else setHop(hop + 1);
   };
   const state = (which: "top" | "low", i: number): "wait" | "next" | "done" | "closed" => {
@@ -202,7 +203,7 @@ export function LightsGame() {
   const hit = round >= 0 && round < ROUNDS.length && sum === target;
   const done = round >= ROUNDS.length;
   useEffect(() => {
-    if (done) actions.star("lights", 3);
+    if (done) (actions.star("lights", 3), noteActivity("lights"));
   }, [done]);
   const line = round < 0 ? "Computers only know two things: ON and OFF. With just four lights, they can count all the way to 15." : done ? "Code cracked! You just counted the way every computer does. It's called binary." : hit ? `Yes! ${on.map((v) => (v ? "on" : "off")).join(", ")} makes ${target}.` : `Turn on the lights that add up to ${target}.`;
   return (

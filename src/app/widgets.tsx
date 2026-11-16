@@ -1,9 +1,10 @@
 /** The hands-on pieces: quiz, put-in-order, binary drill, subnetting trainer, layer diagram. */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { Question } from "@/content/types";
 import { cn } from "@/lib/utils";
 
+import { note } from "./mastery";
 import { actions } from "./store";
 import { Arrow, Btn, Check, Rich } from "./ui";
 
@@ -142,6 +143,9 @@ export function BinaryDrill() {
   const [streak, setStreak] = useState(0);
   const sum = BITS.reduce((a, b, i) => a + (on[i] ? b : 0), 0);
   const hit = sum === target;
+  useEffect(() => {
+    if (hit) note("binary", true);
+  }, [hit, target]);
   return (
     <div className="chunk bg-tint p-4 sm:p-5">
       <p className="text-xs font-bold tracking-wide">Try it</p>
@@ -227,8 +231,12 @@ export function SubnetTrainer() {
     setChecked(true);
     if (all) {
       actions.subnetRight();
+      note("ipv4-subnetting", true);
       setRun(run + 1);
-    } else setRun(0);
+    } else {
+      setRun(0);
+      note("ipv4-subnetting", false);
+    }
   };
   const field = (label: string, v: string, set: (s: string) => void, good: boolean, id: string, ph: string) => (
     <label className="grid gap-1 text-sm font-semibold" htmlFor={id}>

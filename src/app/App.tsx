@@ -59,7 +59,7 @@ export default function App() {
     : [
         ["", "Home", ICONS.home],
         ["map", "Learn", ICONS.learn],
-        ["practice-cards", "Practice", ICONS.practice],
+        ["practice-today", "Practice", ICONS.practice],
         ["me", "Progress", ICONS.progress],
       ];
   const active = (id: string) => route === id || (id === "" && route.startsWith("play-")) || (id === "map" && (route.startsWith("lesson-") || route === "start" || route.startsWith("path-"))) || (id.startsWith("practice") && route.startsWith("practice"));

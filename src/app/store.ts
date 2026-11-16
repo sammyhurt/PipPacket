@@ -16,13 +16,14 @@ export interface Progress {
   theme: "" | "light" | "dark";
   band: Band; // who is learning; "" until they choose
   stars: Record<string, number>; // kids' activities finished -> stars earned
+  ev: Record<string, { d: string[]; m: number }>; // skill id -> days answered right, and misses in a row
 }
 export type Band = "" | "5-7" | "8-10" | "11-13" | "14-17" | "adult";
 /** Under 13: no sharing, no links out, no tracking of any kind. */
 export const isChild = (b: Band) => b === "5-7" || b === "8-10" || b === "11-13";
 export const isLittle = (b: Band) => b === "5-7" || b === "8-10";
 const KEY = "pippacket-progress-v1";
-const blank: Progress = { done: {}, best: {}, skipped: [], placed: false, xp: 0, days: [], boxes: {}, subnet: 0, theme: "", band: "", stars: {} };
+const blank: Progress = { done: {}, best: {}, skipped: [], placed: false, xp: 0, days: [], boxes: {}, subnet: 0, theme: "", band: "", stars: {}, ev: {} };
 
 export const today = () => new Date().toISOString().slice(0, 10);
 export const addDays = (day: string, n: number) => new Date(Date.parse(day) + n * 864e5).toISOString().slice(0, 10);
@@ -72,6 +73,12 @@ export const actions = {
   },
   subnetRight() {
     set(touch({ ...state, subnet: state.subnet + 1, xp: state.xp + 2 }));
+  },
+  /** One right or wrong answer for a skill. Right answers count once per day; a right answer clears the run of misses. */
+  evidence(skill: string, right: boolean) {
+    const cur = state.ev[skill] || { d: [], m: 0 };
+    const next = right ? { d: cur.d.includes(today()) ? cur.d : [...cur.d, today()].slice(-12), m: 0 } : { d: cur.d, m: cur.m + 1 };
+    set(touch({ ...state, ev: { ...state.ev, [skill]: next } }));
   },
   band(band: Band) {
     set({ ...state, band });
