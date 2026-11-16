@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { bandById, bands, teachingSources } from "@/content/kids";
 import { allCards, allLessons, lessonById, net, paths, placement, stageOf } from "@/content/paths";
+import { reviews } from "@/content/reviews";
+import { isReady, levels, skillOfLesson, skills, strands, type Level, type Skill } from "@/content/skills";
 import type { Block, Lesson } from "@/content/types";
 import { cn } from "@/lib/utils";
 
+import { counts, dueSkills, note, prereqsMet, startLevel, stateName, stateOf, todaysQuestions, upNext, type State } from "./mastery";
 import { go } from "./router";
 import { ChallengeInvite, People, seededQuestions, ShareCard } from "./social";
 import { actions, getProgress, isChild, streak, today, useProgress, type Progress } from "./store";
@@ -22,8 +25,10 @@ export function Home() {
   const p = useProgress();
   const band = bandById(p.band);
   const young = p.band === "11-13";
-  const lessons = young ? net.stages[0].lessons : allLessons;
-  const next = lessons.find((l) => !isDone(p, l.id) && !p.skipped.includes(l.id)) || lessons.find((l) => !isDone(p, l.id));
+  const lessons = allLessons;
+  const next = lessonById(upNext(p, 1)[0]?.lesson || "");
+  const mastery = counts(p);
+  const dueToday = dueSkills(p);
   const doneCount = lessons.filter((l) => isDone(p, l.id)).length;
   const started = p.placed || doneCount > 0;
   const due = allCards.filter((c) => p.done[c.lesson.id] && (!p.boxes[c.key] || p.boxes[c.key].due <= today())).length;
@@ -67,21 +72,21 @@ export function Home() {
               </Btn>
             ) : null}
             <Btn size="lg" tone="plain" onClick={() => go("map")}>
-              See all stops
+              See the skill tree
             </Btn>
           </div>
           <div className="mt-6 flex items-center gap-3">
             <Bar value={lessons.length ? doneCount / lessons.length : 0} className="grow" />
             <span className="text-soft text-sm font-semibold">
-              {doneCount} of {lessons.length} stops
+              {doneCount} of {lessons.length} stops · {mastery.mastered} mastered
             </span>
           </div>
         </div>
         <div className="grid gap-4">
-          <button type="button" onClick={() => go("practice-cards")} className="chunk press bg-aqua/40 p-5 text-left">
+          <button type="button" onClick={() => go("practice-today")} className="chunk press bg-aqua/40 p-5 text-left">
             <Eyebrow>Today's practice</Eyebrow>
-            <p className="mt-1 text-xl font-bold">{due ? `${due} flashcard${due === 1 ? "" : "s"} due` : "Flashcards"}</p>
-            <p className="text-soft mt-1 text-sm">{due ? "Two minutes keeps them in your memory." : "Finish a stop and its cards appear here."}</p>
+            <p className="mt-1 text-xl font-bold">{dueToday ? `${dueToday} skill${dueToday === 1 ? "" : "s"} to practise` : "Mixed practice"}</p>
+            <p className="text-soft mt-1 text-sm">{dueToday ? `Eight mixed questions, aimed at what you're weakest on.${due ? ` ${due} flashcard${due === 1 ? "" : "s"} due too.` : ""}` : "Finish a stop and its skill joins your daily mix."}</p>
           </button>
           <button type="button" onClick={() => go(young ? "practice-binary" : "practice-subnet")} className="chunk press bg-pink/40 p-5 text-left">
             <Eyebrow>Quick drill</Eyebrow>
@@ -94,7 +99,7 @@ export function Home() {
       {young ? (
         <section className="chunk bg-tint p-5">
           <p className="font-bold">More for ages 11 to 13 is on the way</p>
-          <p className="text-soft mt-1 text-sm">Guided challenges and small projects are being built. The seven “Start from zero” stops are ready now.</p>
+          <p className="text-soft mt-1 text-sm">Guided challenges and small projects for level 3 are being built. The level 4 foundations are ready now and written to be followed from age 11.</p>
         </section>
       ) : (
         <section>
@@ -191,104 +196,175 @@ export function Who() {
   );
 }
 
-/* ───────────── The map ───────────── */
+/* ───────────── Learn: the skill tree ───────────── */
+
+const dot: Record<State, string> = { mastered: "bg-main text-main-ink", practising: "bg-aqua text-on", review: "bg-pink text-on", skipped: "bg-tint text-soft", new: "border-2 border-peri bg-card text-soft", coming: "border-2 border-dashed border-line text-soft" };
+function StateDot({ st, className }: { st: State; className?: string }) {
+  return (
+    <span className={cn("grid size-8 shrink-0 place-items-center rounded-full text-sm font-extrabold", dot[st], className)} aria-hidden>
+      {st === "mastered" ? <Check className="size-4" /> : st === "review" ? "!" : st === "practising" ? "•" : st === "skipped" ? "–" : ""}
+    </span>
+  );
+}
+const fillOf = { pink: "bg-pink", aqua: "bg-aqua", sky: "bg-sky", lav: "bg-lav", peri: "bg-peri" } as const;
 
 export function MapPage() {
   const p = useProgress();
-  const next = nextLesson(p);
-  const done = allLessons.filter((l) => isDone(p, l.id)).length;
-  useEffect(() => {
-    if (next && done) document.getElementById("stop-" + next.id)?.scrollIntoView({ block: "center" });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const base = startLevel(p.band);
+  // adults who already know the foundations open on the certification level
+  const foundationsDone = skills.filter((x) => x.level === 4 && x.lesson).every((x) => stateOf(p, x) !== "new");
+  const [level, setLevel] = useState<Level>(base === 4 && foundationsDone ? 5 : base);
+  const next = upNext(p, 3);
+  const c = counts(p);
+  const openSkill = (x: Skill) => go(x.lesson ? "lesson-" + x.lesson : "play-" + x.activity);
   return (
-    <div className={cn(wrap, "max-w-3xl py-10")}>
-      <Tag className="bg-net text-net-ink">Path</Tag>
-      <Display as="h1" className="mt-3">Networking</Display>
-      <p className="text-soft mt-2 max-w-[60ch]">{net.goal} Follow the trail in order, or jump to any stop.</p>
-      <div className="mt-5 flex items-center gap-3">
-        <Bar value={done / allLessons.length} className="grow" />
-        <span className="font-mono text-sm font-semibold">
-          {done}/{allLessons.length}
-        </span>
+    <div className={cn(wrap, "py-6 sm:py-8")}>
+      <Title as="h1" eyebrow="Learn">
+        The skill tree
+      </Title>
+      <p className="text-soft mt-2 max-w-[64ch]">Eleven strands of knowledge, six levels of depth. Every skill you master lights up, and the same tree grows with you from first steps to professional.</p>
+
+      <div className="mt-5 grid grid-cols-3 gap-3 sm:max-w-xl">
+        {[
+          [c.mastered, "Mastered", "bg-main text-main-ink"],
+          [c.practising, "Practising", "bg-aqua text-on"],
+          [c.review, "Need review", "bg-pink text-on"],
+        ].map(([n, l, cls]) => (
+          <div key={l as string} className="chunk flex items-center gap-3 p-3">
+            <span className={cn("grid size-9 shrink-0 place-items-center rounded-full text-sm font-extrabold", cls as string)}>{n}</span>
+            <span className="text-sm font-semibold">{l}</span>
+          </div>
+        ))}
       </div>
-      {!p.placed && !done ? (
-        <div className="chunk bg-tint mt-6 flex flex-wrap items-center justify-between gap-3 p-4">
-          <p className="font-semibold">Not sure where to begin?</p>
+
+      {!p.placed && !Object.keys(p.done).length && base >= 4 ? (
+        <div className="chunk bg-tint mt-5 flex flex-wrap items-center justify-between gap-3 p-4">
+          <p className="font-semibold">Not sure where to begin? Eight questions find your starting point.</p>
           <Btn size="sm" onClick={() => go("start")}>
-            Find my starting point
+            Take the placement quiz
           </Btn>
         </div>
       ) : null}
 
-      {(p.band === "11-13" ? net.stages.slice(0, 1) : net.stages).map((stage) => {
-        const sd = stage.lessons.filter((l) => isDone(p, l.id)).length;
-        return (
-          <section key={stage.id} className="mt-12">
-            <div className="flex flex-wrap items-end justify-between gap-2">
-              <div>
-                <Tag className={stage.lessons.length ? "bg-card" : "text-soft border-line bg-transparent"}>{stage.level}</Tag>
-                <Display className={cn("mt-3 text-[clamp(1.3rem,2.6vw,1.7rem)]", !stage.lessons.length && "text-soft")}>{stage.title}</Display>
-                <p className="text-soft mt-1 text-[15px]">{stage.blurb}</p>
-              </div>
-              {stage.lessons.length ? (
-                <span className="font-mono text-sm font-semibold">
-                  {sd}/{stage.lessons.length}
-                </span>
-              ) : (
-                <Tag className="text-soft border-line bg-transparent">Coming next</Tag>
-              )}
-            </div>
-            {stage.lessons.length ? <Trail lessons={stage.lessons} nextId={next?.id} /> : null}
-            {stage.planned ? (
-              <ul className="mt-4 grid gap-2">
-                {stage.planned.map((t) => (
-                  <li key={t} className="border-line text-soft flex items-center gap-3 rounded-xl border border-dashed px-4 py-2.5 text-[15px]">
-                    <span className="border-line size-3 shrink-0 rounded-full border" /> {t}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </section>
-        );
-      })}
-      <section className={cn("mt-12", p.band === "11-13" && "hidden")}>
-        <Tag className="text-soft border-line bg-transparent">After CCNA</Tag>
-        <Display className="text-soft mt-3 text-[clamp(1.3rem,2.6vw,1.7rem)]">CCNP Enterprise and expert scenarios</Display>
-        <p className="text-soft mt-1 text-[15px]">Advanced routing, design and troubleshooting cases. Planned once the CCNA trail is complete.</p>
-      </section>
-    </div>
-  );
-}
+      {next.length ? (
+        <section className="mt-8">
+          <h2 className="text-xl">Up next for you</h2>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            {next.map((x, i) => {
+              const st = stateOf(p, x);
+              return (
+                <button key={x.id} type="button" onClick={() => openSkill(x)} className={cn("chunk press flex flex-col p-4 text-left", i === 0 && "border-main")}>
+                  <span className="flex items-center gap-2">
+                    <StateDot st={st} />
+                    <span className="text-soft text-xs font-bold">
+                      {strands.find((t) => t.id === x.strand)!.name} · Level {x.level}
+                    </span>
+                  </span>
+                  <span className="mt-3 text-lg leading-snug font-bold">{x.title}</span>
+                  <span className="text-main mt-3 inline-flex items-center gap-1.5 text-sm font-bold">
+                    {st === "review" ? "Review it" : i === 0 ? "Start" : "Open"} <Arrow />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
-const ROW = 104;
-const XS = [14, 30, 46, 30];
-/** The winding trail: stops placed left to right and back, joined by one dashed road. */
-function Trail({ lessons, nextId }: { lessons: Lesson[]; nextId?: string }) {
-  const p = useProgress();
-  const pts = lessons.map((_, i) => [XS[i % 4], i * ROW + 40] as const);
-  const d = pts.map(([x, y], i) => (i === 0 ? `M ${x} ${y}` : `C ${pts[i - 1][0]} ${pts[i - 1][1] + ROW / 2}, ${x} ${y - ROW / 2}, ${x} ${y}`)).join(" ");
-  return (
-    <div className="relative mt-6" style={{ height: lessons.length * ROW }}>
-      <svg className="absolute inset-0 size-full" viewBox={`0 0 100 ${lessons.length * ROW}`} preserveAspectRatio="none" aria-hidden>
-        <path d={d} fill="none" stroke="var(--line)" strokeWidth="5" strokeLinecap="round" strokeDasharray="2 12" vectorEffect="non-scaling-stroke" />
-      </svg>
-      {lessons.map((l, i) => {
-        const done = isDone(p, l.id);
-        const here = l.id === nextId;
-        const skipped = !done && p.skipped.includes(l.id);
-        return (
-          <button key={l.id} id={"stop-" + l.id} type="button" onClick={() => go("lesson-" + l.id)} className="group absolute flex -translate-y-1/2 items-center gap-3 text-left" style={{ left: `calc(${XS[i % 4]}% - 32px)`, top: i * ROW + 40, right: 0 }}>
-            <span className={cn("press border-line grid size-16 shrink-0 place-items-center rounded-full border font-mono text-lg font-bold", done ? "bg-ink text-paper" : here ? "bg-main bob text-main-ink" : skipped ? "bg-tint text-soft border-dashed" : "bg-card")}>{done ? <Check className="size-7" /> : i + 1}</span>
-            <span className="min-w-0">
-              {here ? <span className="bg-main text-main-ink mb-1 inline-block rounded-full px-2 py-0.5 text-xs font-bold tracking-wide">You are here</span> : null}
-              <span className="block text-[15px] leading-tight font-bold group-hover:underline sm:text-base">{l.title}</span>
-              <span className="text-soft block text-xs">
-                {l.minutes} min{done ? ` · quiz ${Math.round((p.best[l.id] ?? 0) * 100)}%` : skipped ? " · skipped by your placement" : ""}
-              </span>
-            </span>
-          </button>
-        );
-      })}
+      <section className="mt-10">
+        <h2 className="text-xl">The whole tree at a glance</h2>
+        <p className="text-soft mt-1 text-sm">Each dot is a skill. Pick a level to see its skills below.</p>
+        <div className="chunk mt-3 overflow-x-auto p-3 sm:p-4">
+          <div className="grid min-w-[34rem] grid-cols-[minmax(8rem,1.4fr)_repeat(6,minmax(0,1fr))] items-center gap-x-2 gap-y-1.5 text-xs">
+            <span />
+            {levels.map((l) => (
+              <button key={l.n} type="button" aria-pressed={level === l.n} onClick={() => setLevel(l.n)} className={cn("rounded-lg px-1 py-1.5 text-center font-bold", level === l.n ? "bg-main text-main-ink" : "bg-tint hover:bg-lav/40")}>
+                <span className="block">Level {l.n}</span>
+                <span className="block font-semibold opacity-80">{l.name}</span>
+              </button>
+            ))}
+            {strands.map((t) => (
+              <Fragment key={t.id}>
+                <span className="flex items-center gap-2 py-1 text-[13px] font-semibold">
+                  <span className={cn("size-3 shrink-0 rounded-full", fillOf[t.color])} /> {t.name}
+                </span>
+                {levels.map((l) => (
+                  <span key={l.n} className={cn("flex flex-wrap justify-center gap-1 rounded-lg py-1.5", level === l.n && "bg-tint")}>
+                    {skills
+                      .filter((x) => x.strand === t.id && x.level === l.n)
+                      .map((x) => {
+                        const st = stateOf(p, x);
+                        return <span key={x.id} title={`${x.title}: ${stateName[st]}`} className={cn("size-2.5 rounded-full", st === "mastered" ? "bg-main" : st === "practising" ? "bg-aqua ring-peri ring-1" : st === "review" ? "bg-pink ring-1 ring-[var(--bad)]" : st === "coming" ? "bg-line" : "bg-peri/60")} />;
+                      })}
+                  </span>
+                ))}
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <Eyebrow>Level {level}</Eyebrow>
+            <h2 className="mt-1 text-2xl">{levels[level - 1].name}</h2>
+            <p className="text-soft text-sm">{levels[level - 1].who}</p>
+          </div>
+          <div className="flex gap-1.5" role="group" aria-label="Choose a level">
+            {levels.map((l) => (
+              <button key={l.n} type="button" aria-pressed={level === l.n} aria-label={`Level ${l.n}, ${l.name}`} onClick={() => setLevel(l.n)} className={cn("size-9 rounded-full text-sm font-bold", level === l.n ? "bg-main text-main-ink" : "bg-tint")}>
+                {l.n}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {strands.map((t) => {
+            const list = skills.filter((x) => x.strand === t.id && x.level === level);
+            if (!list.length) return null;
+            return (
+              <div key={t.id} className="chunk p-4">
+                <p className="flex items-center gap-2 font-bold">
+                  <span className={cn("text-on grid size-7 place-items-center rounded-lg text-xs font-extrabold", fillOf[t.color])}>{t.id}</span>
+                  {t.name}
+                </p>
+                <ul className="mt-3 grid gap-1.5">
+                  {list.map((x) => {
+                    const st = stateOf(p, x);
+                    const wait = st === "new" && !prereqsMet(p, x);
+                    const inner = (
+                      <>
+                        <StateDot st={st} />
+                        <span className="min-w-0 grow">
+                          <span className={cn("block leading-snug font-semibold", !isReady(x) && "text-soft")}>{x.title}</span>
+                          <span className="text-soft block text-xs">
+                            {isReady(x) ? stateName[st] : "Being written"}
+                            {x.topic ? ` · ${x.topic}` : ""}
+                            {wait ? ` · best after “${x.after![0]}”` : ""}
+                          </span>
+                        </span>
+                        {isReady(x) ? <Arrow className="text-soft shrink-0" /> : null}
+                      </>
+                    );
+                    return (
+                      <li key={x.id}>
+                        {isReady(x) ? (
+                          <button type="button" onClick={() => openSkill(x)} className="hover:bg-tint flex w-full items-center gap-3 rounded-xl p-2 text-left">
+                            {inner}
+                          </button>
+                        ) : (
+                          <div className="flex items-center gap-3 p-2">{inner}</div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
@@ -405,7 +481,9 @@ export function LessonPage({ id }: { id: string }) {
   if (!lesson) return <Missing />;
   const stage = stageOf(id)!;
   const i = allLessons.indexOf(lesson);
-  const after = allLessons[i + 1];
+  const after = lessonById(upNext(p, 3).find((x) => x.lesson !== id)?.lesson || "") || allLessons[i + 1];
+  const skill = skillOfLesson(id);
+  const review = reviews[id];
   const inStage = stage.lessons.indexOf(lesson);
   return (
     <article className={cn(wrap, "max-w-3xl py-8 sm:py-10")}>
@@ -418,11 +496,14 @@ export function LessonPage({ id }: { id: string }) {
           Stop {inStage + 1} of {stage.lessons.length}
         </Tag>
         <Tag className="bg-card">{lesson.minutes} min</Tag>
-        {isDone(p, id) ? (
-          <Tag className="bg-good/15 border-good text-good">
-            <Check className="size-3.5" /> Done
+        {skill && stateOf(p, skill) !== "new" ? <Tag className={stateOf(p, skill) === "mastered" ? "bg-main text-main-ink" : stateOf(p, skill) === "review" ? "bg-pink text-on" : "bg-aqua text-on"}>{stateName[stateOf(p, skill)]}</Tag> : null}
+        {review ? (
+          <Tag className="bg-good/15 text-good">
+            <Check className="size-3.5" /> Reviewed by {review.by}
           </Tag>
-        ) : null}
+        ) : (
+          <Tag className="text-soft">Not yet reviewed by an engineer</Tag>
+        )}
       </div>
       <h1 className="mt-4 text-[clamp(1.9rem,4.6vw,2.8rem)]">{lesson.title}</h1>
             <p className="text-soft mt-3 text-lg">
@@ -447,7 +528,7 @@ export function LessonPage({ id }: { id: string }) {
             <p className="text-soft mt-2">
               {result.first ? "+10 XP for the stop. " : ""}
               {result.score === 1 ? "+5 XP for a perfect quiz. " : "Retake the quiz any time to improve your score. "}
-              The flashcards for this stop are now in your practice deck.
+              This skill is now in your daily practice. Get it right on three different days and it counts as mastered.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               {after ? (
@@ -469,7 +550,7 @@ export function LessonPage({ id }: { id: string }) {
         ) : (
           <>
             <p className="mb-4 text-xs font-bold tracking-wide">Check yourself</p>
-            <Quiz key={id + quizKey} questions={lesson.quiz} doneLabel="Finish this stop" onDone={(score) => setResult({ score, first: actions.finishLesson(id, score) })} />
+            <Quiz key={id + quizKey} questions={lesson.quiz} doneLabel="Finish this stop" onDone={(score) => (note(id, score >= 0.6), setResult({ score, first: actions.finishLesson(id, score) }))} />
           </>
         )}
       </section>
@@ -477,6 +558,7 @@ export function LessonPage({ id }: { id: string }) {
       <footer className="border-line text-soft mt-10 border-t pt-5 text-sm">
         <p>
           <strong className="text-ink">Facts last checked:</strong> {fmtDay(lesson.checked)}
+          {review ? ` · Reviewed by ${review.by} on ${fmtDay(review.on)}` : " · Awaiting review by a certified engineer"}
         </p>
         <ul className="mt-2 grid gap-1">
           {lesson.sources.map((s) => (
@@ -553,6 +635,7 @@ export function Start() {
 
 export function Practice({ tool }: { tool: string }) {
   const tabs: [string, string][] = [
+    ["today", "Today"],
     ["cards", "Flashcards"],
     ["quiz", "Quick quiz"],
     ["subnet", "Subnetting"],
@@ -569,7 +652,7 @@ export function Practice({ tool }: { tool: string }) {
           </button>
         ))}
       </div>
-      <div className="mt-6">{tool === "cards" ? <Cards /> : tool === "quiz" ? <QuickQuiz /> : tool === "subnet" ? <SubnetTrainer /> : <BinaryDrill />}</div>
+      <div className="mt-6">{tool === "today" ? <Today /> : tool === "cards" ? <Cards /> : tool === "quiz" ? <QuickQuiz /> : tool === "subnet" ? <SubnetTrainer /> : <BinaryDrill />}</div>
     </div>
   );
 }
@@ -587,6 +670,7 @@ function Cards() {
   const card = due[0];
   const answer = (knew: boolean) => {
     actions.card(card.key, knew);
+    note(card.lesson.id, knew);
     setFlipped(false);
     setSeen(seen + 1);
   };
@@ -631,6 +715,66 @@ function Cards() {
   );
 }
 
+/** Today's mixed practice: eight questions across the skills you have started, weakest first, with the result per skill. */
+function Today() {
+  const p = useProgress();
+  const [round, setRound] = useState(0);
+  const [result, setResult] = useState<null | { skill: Skill; right: boolean; before: State }[]>(null);
+  const qs = useMemo(() => todaysQuestions(getProgress()), [round]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (qs.length < 3)
+    return (
+      <div className="chunk p-6">
+        <h2 className="text-2xl">Nothing to practise yet</h2>
+        <p className="text-soft mt-2 max-w-[56ch]">Daily practice mixes questions from the skills you have started. Finish a stop or two and come back.</p>
+        <Btn className="mt-4" onClick={() => go("map")}>
+          Open the skill tree <Arrow />
+        </Btn>
+      </div>
+    );
+  return (
+    <div className="chunk p-5 sm:p-7">
+      {result === null ? (
+        <>
+          <p className="text-soft mb-4 text-sm">Mixed on purpose: switching between topics is harder in the moment and makes them stick.</p>
+          <Quiz
+            key={round}
+            questions={qs}
+            doneLabel="See how I did"
+            onDone={(_, right) => {
+              const before = qs.map((q) => stateOf(getProgress(), skillOfLesson(q.lesson.id)!));
+              qs.forEach((q, n) => note(q.lesson.id, right[n]));
+              setResult(qs.map((q, n) => ({ skill: skillOfLesson(q.lesson.id)!, right: right[n], before: before[n] })));
+            }}
+          />
+        </>
+      ) : (
+        <div className="pop">
+          <h2 className="text-3xl">
+            {result.filter((r) => r.right).length} of {result.length} right
+          </h2>
+          <ul className="mt-4 grid gap-2">
+            {[...new Map(result.map((r) => [r.skill.id, r])).values()].map((r) => {
+              const now = stateOf(p, r.skill);
+              return (
+                <li key={r.skill.id} className="flex items-center gap-3">
+                  <StateDot st={now} />
+                  <span className="min-w-0">
+                    <span className="block font-semibold">{r.skill.title}</span>
+                    <span className="text-soft block text-xs">{now === r.before ? stateName[now] : `${stateName[r.before]} → ${stateName[now]}`}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <Btn className="mt-5" onClick={() => (setResult(null), setRound(round + 1))}>
+            Another round <Arrow />
+          </Btn>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function QuickQuiz() {
   const [seed, setSeed] = useState(() => 1000 + Math.floor(Math.random() * 9000));
   const [score, setScore] = useState<number | null>(null);
@@ -639,7 +783,7 @@ function QuickQuiz() {
   return (
     <div className="chunk p-5 sm:p-7">
       {score === null ? (
-        <Quiz key={seed} questions={qs} onDone={(s) => setScore(s)} doneLabel="See my score" />
+        <Quiz key={seed} questions={qs} onDone={(sc, right) => (qs.forEach((q, n) => note(q.lesson.id, right[n])), setScore(sc))} doneLabel="See my score" />
       ) : (
         <div className="pop">
           <h2 className="text-3xl font-bold">
@@ -710,26 +854,27 @@ export function Me() {
         </>
       )}
 
-      <h2 className="mt-10 text-2xl font-bold">By stage</h2>
+      <h2 className="mt-10 text-2xl font-bold">By strand</h2>
+      <p className="text-soft mt-1 text-sm">Mastered skills out of those with a lesson ready. More skills open as lessons are written.</p>
       <div className="mt-4 grid gap-4">
-        {net.stages
-          .filter((s) => s.lessons.length)
-          .map((s) => {
-            const n = done(s.lessons.map((l) => l.id));
-            return (
-              <div key={s.id}>
-                <div className="flex justify-between text-sm font-semibold">
-                  <span>
-                    {s.level}: {s.title}
-                  </span>
-                  <span className="font-mono">
-                    {n}/{s.lessons.length}
-                  </span>
-                </div>
-                <Bar value={n / s.lessons.length} className="mt-1.5" />
+        {strands.map((t) => {
+          const c = counts(
+            p,
+            skills.filter((x) => x.strand === t.id),
+          );
+          if (!c.ready) return null;
+          return (
+            <div key={t.id}>
+              <div className="flex justify-between gap-3 text-sm font-semibold">
+                <span>{t.name}</span>
+                <span className="text-soft">
+                  {c.mastered} mastered · {c.practising} practising{c.review ? ` · ${c.review} to review` : ""} · {c.ready} ready of {c.total}
+                </span>
               </div>
-            );
-          })}
+              <Bar value={c.mastered / c.ready} className="mt-1.5" />
+            </div>
+          );
+        })}
       </div>
 
       <div className="border-line text-soft mt-12 border-t pt-5 text-sm">
