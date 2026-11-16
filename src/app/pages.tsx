@@ -518,6 +518,18 @@ export function LessonPage({ id }: { id: string }) {
         ))}
       </div>
 
+      {skill?.lab ? (
+        <aside className="chunk bg-pink/30 mt-10 flex flex-wrap items-center justify-between gap-3 p-5">
+          <div className="min-w-0">
+            <p className="text-lg font-bold">Now do it for real</p>
+            <p className="text-soft text-sm">This skill has a lab mission: build it, break it and fix it on a simulated network.</p>
+          </div>
+          <Btn onClick={() => go("lab-" + skill.lab)}>
+            Open the lab <Arrow />
+          </Btn>
+        </aside>
+      ) : null}
+
       <section className="chunk mt-12 p-5 sm:p-7" id="check">
         {result ? (
           <div className="pop" aria-live="polite">

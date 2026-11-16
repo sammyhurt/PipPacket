@@ -35,7 +35,7 @@ const { chromium } = require('playwright');
     const evBefore = JSON.stringify((await st()).ev); await p.reload(); await p.waitForTimeout(500); ok('reload keeps work, no double credit', await p.getByText('Mission complete').isVisible() && JSON.stringify((await st()).ev) === evBefore);
     // skill tree shows lab skills
     await p.evaluate(() => location.hash = 'map'); await p.waitForTimeout(300); await p.getByRole('button', { name: 'Level 5, Certified' }).click();
-    ok('tree: VLAN skill practising via lab', /Practising · lab mission · CCNA 2.0 · Domain 2/.test((await p.locator('li', { hasText: 'VLANs and access ports' }).innerText()).replace(/\n/g, ' ')));
+    ok('tree: VLAN skill practising via lab', /Practising · CCNA 2.0 · 2.1/.test((await p.locator('li', { hasText: 'VLANs and access ports' }).innerText()).replace(/\n/g, ' ')));
     // sandbox
     await p.evaluate(() => location.hash = 'lab-sandbox'); await p.waitForTimeout(300); await p.getByRole('button', { name: '+ PC' }).click(); await p.getByRole('button', { name: '+ Router' }).click(); await p.waitForTimeout(100);
     ok('sandbox adds devices', (await p.locator('svg [role=button]').count()) === 2);

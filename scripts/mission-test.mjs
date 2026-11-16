@@ -16,6 +16,7 @@ const solve = {
   "fix-the-port": (net) => { cli(net, "S1", ["interface gi0/2", "no shutdown"]); by(net, "PC2").ifaces[0].ip = "192.168.1.20"; cable(net, "PC3", "S1"); },
   "two-departments": (net) => cli(net, "S1", ["vlan 10", "name Sales", "vlan 20", "name Engineering", "interface gi0/1", "switchport mode access", "switchport access vlan 10", "interface gi0/2", "switchport access vlan 10", "interface gi0/3", "switchport access vlan 20", "interface gi0/4", "switchport access vlan 20"]),
   "wire-the-school": (net) => { for (const s of ["S1", "S2"]) cli(net, s, ["vlan 10", "name Staff", "vlan 20", "name Students", "interface gi0/1", "switchport mode access", "switchport access vlan 10", "interface gi0/2", "switchport access vlan 20", "interface gi0/8", "switchport mode trunk"]); },
+  "departments-talk": (net) => { cli(net, "S1", ["ip routing", "interface vlan 10", "ip address 192.168.10.1 255.255.255.0", "no shutdown", "interface vlan 20", "ip address 192.168.20.1 255.255.255.0", "no shutdown"]); for (const [n, g] of [["PC1", "192.168.10.1"], ["PC2", "192.168.10.1"], ["PC3", "192.168.20.1"], ["PC4", "192.168.20.1"]]) by(net, n).gateway = g; },
 };
 for (const m of M.missions) {
   const net = m.start();
@@ -28,4 +29,7 @@ for (const m of M.missions) {
 }
 // wire-the-school half done: trunk on one side only must not pass
 { const m = M.missions.find((x) => x.id === "wire-the-school"); const net = m.start(); solve["wire-the-school"](net); cli(net, "S2", ["interface gi0/8", "switchport mode access"]); const r = state(m, net); ok("wire-the-school: one-sided trunk fails", !r.every((x) => x.ok)); }
+// departments-talk without "ip routing": the gateway answers but must not forward, and the reason says so
+{ const m = M.missions.find((x) => x.id === "departments-talk"); const net = m.start(); solve["departments-talk"](net); cli(net, "S1", ["no ip routing"]); const r = E.canReach(net, "PC1", "PC3"); ok("departments-talk: no ip routing fails with reason", !r.ok && /ip routing/.test(r.why) && E.canReach(net, "PC1", "S1").ok, r); }
 console.log(fails ? `\n${fails} FAILED` : "\nall passed"); process.exit(fails ? 1 : 0);
+

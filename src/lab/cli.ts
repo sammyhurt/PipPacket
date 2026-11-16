@@ -3,7 +3,7 @@
  * It understands the commands the missions teach, with the usual abbreviations ("conf t", "sh ip int br").
  * Anything else gets IOS's own error marks, or a plain "not in this lab yet" for real commands we have not built.
  */
-import { ifOf, lineState, maskBits, peer, ping, short, toInt, type Device, type Iface, type Net } from "./engine";
+import { ifOf, lineState, maskBits, owners, peer, ping, short, toInt, type Device, type Iface, type Net } from "./engine";
 
 export interface Session {
   mode: "user" | "priv" | "config" | "if" | "vlan";
@@ -105,11 +105,27 @@ function showRun(d: Device) {
     out.push("!");
   }
   for (const [v, s] of Object.entries(d.svis)) out.push(`interface Vlan${v}`, s.ip ? ` ip address ${s.ip} ${s.mask}` : " no ip address", ...(s.shut ? [" shutdown"] : []), "!");
+  if (d.l3) out.splice(5, 0, "ip routing", "!");
   if (d.gateway) out.push(`ip default-gateway ${d.gateway}`, "!");
   return out.concat("end").join("\n");
 }
+/** Neighbours as CDP or LLDP would report them: other switches and routers on a live cable. */
+function showNeighbors(net: Net, d: Device, lldp: boolean, detail: boolean) {
+  const rows = d.ifaces.map((i) => ({ i, p: lineState(net, d, i) === "up" ? peer(net, d.id, i.name) : null })).filter((x) => x.p && x.p.d.kind !== "pc");
+  const plat = (x: Device) => (x.kind === "switch" ? "Lab-Switch" : "Lab-Router");
+  if (detail)
+    return rows
+      .map(({ i, p }) => {
+        const ip = owners(net).find((o) => o.d === p!.d)?.ip;
+        return ["-------------------------", `Device ID: ${p!.d.name}`, ...(ip ? [`  IP address: ${ip}`] : []), `Platform: ${plat(p!.d)},  Capabilities: ${p!.d.kind === "switch" ? "Switch" : "Router"}`, `Interface: ${i.name},  Port ID (outgoing port): ${p!.i.name}`, ...(lldp || d.kind !== "switch" ? [] : [`Native VLAN: ${i.mode === "trunk" ? i.native : i.vlan}`, "Duplex: full"])].join("\n");
+      })
+      .join("\n");
+  if (lldp) return [`${pad("Device ID", 20)}${pad("Local Intf", 15)}${pad("Hold-time", 11)}${pad("Capability", 12)}Port ID`, ...rows.map(({ i, p }) => `${pad(p!.d.name, 20)}${pad(short(i.name), 15)}${pad(120, 11)}${pad(p!.d.kind === "switch" ? "B" : "R", 12)}${short(p!.i.name)}`), "", `Total entries displayed: ${rows.length}`].join("\n");
+  return ["Capability Codes: R - Router, S - Switch", "", `${pad("Device ID", 17)}${pad("Local Intrfce", 18)}${pad("Holdtme", 9)}${pad("Capability", 12)}${pad("Platform", 12)}Port ID`, ...rows.map(({ i, p }) => `${pad(p!.d.name, 17)}${pad(short(i.name).replace("Gi", "Gig "), 18)}${pad(150, 9)}${pad(p!.d.kind === "switch" ? "S" : "R", 12)}${pad(plat(p!.d), 12)}${short(p!.i.name).replace("Gi", "Gig ")}`), "", `Total cdp entries displayed : ${rows.length}`].join("\n");
+}
 function show(net: Net, d: Device, w: string[]): string {
   if (!w.length) return INCOMPLETE;
+  if ((is(w[0], "cdp", 2) || is(w[0], "lldp", 2)) && is(w[1], "neighbors", 1)) return showNeighbors(net, d, is(w[0], "lldp", 2), is(w[2], "detail", 1));
   if (is(w[0], "running-config", 1) && w.length === 1) return showRun(d);
   if (is(w[0], "ip", 2) && is(w[1], "interface", 3) && is(w[2], "brief", 1)) return showIpIntBrief(net, d);
   if (is(w[0], "vlan", 1) && (w.length === 1 || is(w[1], "brief", 1))) return d.kind === "switch" ? showVlanBrief(d) : INVALID;
@@ -123,7 +139,7 @@ function show(net: Net, d: Device, w: string[]): string {
     const p = peer(net, d.id, i.name);
     return `${i.name} is ${a}, line protocol is ${b}${a === "up" ? " (connected)" : a === "down" ? " (notconnect)" : ""}\n  ${i.desc ? `Description: ${i.desc}\n  ` : ""}${i.ip ? `Internet address is ${i.ip}/${maskBits(i.mask)}\n  ` : ""}Full-duplex, 1000Mb/s${p ? `\n  Cabled to ${p.d.name} ${short(p.i.name)}` : "\n  No cable attached"}`;
   }
-  if (["mac", "spanning-tree", "cdp", "lldp", "version", "ip", "arp", "startup-config"].some((x) => is(w[0], x, 2))) return LATER;
+  if (["mac", "spanning-tree", "cdp", "lldp", "version", "ip", "arp", "startup-config", "etherchannel", "logging", "power"].some((x) => is(w[0], x, 2))) return LATER;
   return INVALID;
 }
 
@@ -186,6 +202,7 @@ export function run(net: Net, d: Device, s: Session, line: string): string {
     d.vlans[v] ||= `VLAN${String(v).padStart(4, "0")}`;
     return (s.mode = "vlan"), (s.vlan = v), "";
   }
+  if (d.kind === "switch" && is(c[0], "ip", 2) && is(c[1], "routing", 1) && c.length === 2) return (d.l3 = !no), "";
   if (d.kind === "switch" && is(c[0], "ip", 2) && is(c[1], "default-gateway", 1)) {
     if (no) return (d.gateway = undefined), "";
     return toInt(c[2]) === null ? INVALID : ((d.gateway = c[2]), "");
@@ -257,8 +274,8 @@ function help(s: Session, d: Device): string {
   const sw = d.kind === "switch";
   return {
     user: "enable            Go to the # prompt, where you can look and configure\nping <address>    Test whether an address answers\nshow ...          Look at the device",
-    priv: `configure terminal        Start changing the configuration\nshow running-config       The whole configuration\nshow ip interface brief   Every port and its state${sw ? "\nshow vlan brief           VLANs and the ports in each\nshow interfaces status    Ports, state and VLAN\nshow interfaces trunk     Trunk ports and the VLANs they carry" : ""}\nping <address>            Test whether an address answers\nexit                      Back to the > prompt`,
-    config: `hostname <name>           Rename the device\ninterface <port>          Configure a port, such as gi0/1${sw ? "\ninterface vlan <number>   Give the switch itself an address\nvlan <number>             Create a VLAN" : ""}\nend                       Back to the # prompt`,
+    priv: `configure terminal        Start changing the configuration\nshow running-config       The whole configuration\nshow ip interface brief   Every port and its state${sw ? "\nshow vlan brief           VLANs and the ports in each\nshow interfaces status    Ports, state and VLAN\nshow interfaces trunk     Trunk ports and the VLANs they carry\nshow cdp neighbors        The switches and routers cabled to this one" : ""}\nping <address>            Test whether an address answers\nexit                      Back to the > prompt`,
+    config: `hostname <name>           Rename the device\ninterface <port>          Configure a port, such as gi0/1${sw ? "\ninterface vlan <number>   Give the switch an address in a VLAN\nvlan <number>             Create a VLAN\nip routing                Let the switch route between its VLANs" : ""}\nend                       Back to the # prompt`,
     if: `${sw ? "switchport mode access | trunk\nswitchport access vlan <number>\nswitchport trunk allowed vlan <list>\nswitchport trunk native vlan <number>\n" : "ip address <address> <mask>\n"}shutdown | no shutdown\ndescription <text>\nexit | end`,
     vlan: "name <text>       Give the VLAN a name\nexit | end",
   }[s.mode];

@@ -83,5 +83,6 @@ ok("unsupported real command says so", /not part of this lab yet/.test(out[11]))
 ok("write memory", /\[OK\]/.test(out[13]));
 ok("bad mask rejected", /Bad mask/.test(cmds(net, s, ["en", "conf t", "int vlan 1", "ip address 10.0.0.1 255.0.255.0"]).at(-1)));
 ok("? lists commands", /configure terminal/.test(cmds(net, s, ["en", "?"])[1]));
+{ const n2 = { devices: [], links: [] }; const a = sw(n2, "a", "S1"); const b = sw(n2, "b", "S2"); cable(n2, "a", G(8), "b", G(8)); const o = cmds(n2, a, ["en", "show cdp neighbors", "sh lldp nei", "sh cdp nei det"]); ok("show cdp neighbors lists the far switch and port", /S2\s+Gig 0\/8\s+150\s+S\s+Lab-Switch\s+Gig 0\/8/.test(o[1]) && /S2\s+Gi0\/8/.test(o[2]) && /Native VLAN: 1/.test(o[3]), o); }
 console.log(fails ? `\n${fails} FAILED` : "\nall passed");
 process.exit(fails ? 1 : 0);

@@ -230,9 +230,8 @@ export const ccna1: Stage = {
   ],
 };
 
-/** The other four CCNA v2.0 domains, named from the official topic list. Lessons come next. */
+/** The CCNA v2.0 domains not written yet, named from the official topic list. */
 export const ccnaPlanned: Stage[] = [
-  { id: "ccna-2", level: "CCNA", title: "Switching and network access", blurb: "Domain 2, 25%.", lessons: [], planned: ["Connecting switches: trunks, EtherChannel and SVIs", "Edge ports for PCs, phones, access points and hosts", "CDP and LLDP", "Troubleshooting with show, ping, traceroute and packet capture", "Rapid PVST+ spanning tree"] },
   { id: "ccna-3", level: "CCNA", title: "IP routing", blurb: "Domain 3, 20%.", lessons: [], planned: ["Reading a routing table", "Static routes for IPv4 and IPv6", "Single-area OSPFv2 and OSPFv3", "HSRP and VRRP"] },
   { id: "ccna-4", level: "CCNA", title: "Network services and security", blurb: "Domain 4, 20%.", lessons: [], planned: ["Local users and AAA with TACACS+ and RADIUS", "Managing files with SFTP and SCP", "NAT and PAT", "DNS records", "IPsec VPNs", "IPv4 access lists", "Layer 2 security features"] },
   { id: "ccna-5", level: "CCNA", title: "AI, operations and management", blurb: "Domain 5, 10%.", lessons: [], planned: ["Agentic AI in network operations", "Writing AI prompts for network work", "Ways to manage a network", "SNMP", "Ansible", "Reading syslog messages"] },

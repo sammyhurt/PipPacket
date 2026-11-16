@@ -28,7 +28,10 @@ export interface Device {
   vlans: Record<number, string>; // switch: VLAN database
   svis: Record<number, { ip?: string; mask?: string; shut: boolean }>; // switch: "interface vlan N"
   gateway?: string; // pc, or a switch's "ip default-gateway"
+  l3?: boolean; // a switch with "ip routing" on: it routes between its VLAN interfaces
 }
+/** Routers route. So does a switch once "ip routing" is on. */
+export const routes = (d: Device) => d.kind === "router" || (d.kind === "switch" && !!d.l3);
 export interface Link {
   a: { d: string; i: string };
   b: { d: string; i: string };
@@ -206,9 +209,8 @@ function travel(net: Net, from: Device, dst: string): PingResult {
     if (off && !sameNet(src.ip, dst, src.mask)) return { ok: false, path, why: `${short(off.name)} on ${cur.name} is shut down.` };
     if (!sameNet(src.ip, dst, src.mask)) {
       // a router forwards between the networks it is directly connected to; everything else needs a gateway
-      const connected = cur.kind === "router" ? source(cur, dst) : null;
-      if (cur.kind === "router" && connected && sameNet(connected.ip, dst, connected.mask)) next = dst;
-      else if (cur.gateway) next = cur.gateway;
+      if (cur.gateway && !routes(cur)) next = cur.gateway;
+      else if (routes(cur)) return { ok: false, path, why: `${cur.name} has no interface on the network ${dst} belongs to, and no route to it.` };
       else return { ok: false, path, why: `${dst} is on a different network from ${cur.name} (${netOf(src.ip, src.mask)}), and ${cur.name} has no default gateway to send it to.` };
       if (next !== dst && !sameNet(src.ip, next, src.mask)) return { ok: false, path, why: `${cur.name}'s default gateway ${next} is not on its own network (${netOf(src.ip, src.mask)}), so it cannot reach it.` };
     }
@@ -216,7 +218,7 @@ function travel(net: Net, from: Device, dst: string): PingResult {
     if (!r.found) return { ok: false, ...explain(net, cur, next, r, next !== dst) };
     path = [...path, ...r.path.slice(1)];
     if (next === dst) return { ok: true, path, why: "" };
-    if (r.found.d.kind !== "router") return { ok: false, path, why: `${r.found.d.name} is set as the gateway, but it is not a router and will not pass the message on.` };
+    if (!routes(r.found.d)) return { ok: false, path, why: r.found.d.kind === "switch" ? `${r.found.d.name} holds the gateway address, but “ip routing” is not turned on, so it will not pass the message between VLANs.` : `${r.found.d.name} is set as the gateway, but it is not a router and will not pass the message on.` };
     cur = r.found.d;
   }
   return { ok: false, path, why: "The message went round in circles." };

@@ -56,7 +56,6 @@ function strand(id: string, byLevel: Row[][]): Skill[] {
   );
 }
 const D1 = "CCNA 2.0 · Domain 1";
-const D2 = "CCNA 2.0 · Domain 2";
 const D3 = "CCNA 2.0 · Domain 3";
 const D4 = "CCNA 2.0 · Domain 4";
 const D5 = "CCNA 2.0 · Domain 5";
@@ -67,7 +66,7 @@ export const skills: Skill[] = [
     ["Big things are cut into pieces", "Pieces can arrive out of order"],
     ["What a packet carries", "The rules computers follow to talk", "Following a message across the internet"],
     [["What a network is", { lesson: "what-is-a-network" }], ["Packets and layers", { lesson: "how-data-travels" }], ["TCP, UDP and ports", { lesson: "tcp-udp" }]],
-    [["Reading a packet capture", { topic: D2 }], "Tracing a flow end to end"],
+    [["Reading a packet capture", { topic: "CCNA 2.0 · 2.4" }], "Tracing a flow end to end"],
     ["Quality of service basics", "Diagnosing a slow application"],
   ]),
   ...strand("B", [
@@ -92,13 +91,13 @@ export const skills: Skill[] = [
     ["How a switch knows where devices are", "Why networks are split into groups"],
     [["How a switch learns", { lesson: "how-a-switch-learns" }], ["What a VLAN is", { lab: "two-departments" }], "Broadcasts and why they matter"],
     [
-      ["VLANs and access ports", { topic: D2, lab: "two-departments", after: ["How a switch learns"] }],
-      ["Trunks", { topic: D2, lab: "wire-the-school", after: ["VLANs and access ports"] }],
-      ["EtherChannel", { topic: D2, after: ["Trunks"] }],
-      ["SVIs and routing between VLANs", { topic: D2, after: ["Trunks"] }],
-      ["Edge ports for PCs, phones and access points", { topic: D2 }],
-      ["CDP and LLDP", { topic: D2 }],
-      ["Rapid PVST+ spanning tree", { topic: D2, after: ["Trunks"] }],
+      ["VLANs and access ports", { topic: "CCNA 2.0 · 2.1", lesson: "vlans", lab: "two-departments", after: ["How a switch learns"] }],
+      ["Trunks", { topic: "CCNA 2.0 · 2.1", lesson: "trunks", lab: "wire-the-school", after: ["VLANs and access ports"] }],
+      ["EtherChannel", { topic: "CCNA 2.0 · 2.1", lesson: "etherchannel", after: ["Trunks"] }],
+      ["SVIs and routing between VLANs", { topic: "CCNA 2.0 · 2.1", lesson: "svi", lab: "departments-talk", after: ["VLANs and access ports"] }],
+      ["Edge ports for PCs, phones and access points", { topic: "CCNA 2.0 · 2.2", lesson: "edge-ports", after: ["VLANs and access ports"] }],
+      ["CDP and LLDP", { topic: "CCNA 2.0 · 2.3", lesson: "cdp-lldp" }],
+      ["Rapid PVST+ spanning tree", { topic: "CCNA 2.0 · 2.5", lesson: "rapid-pvst", after: ["Trunks"] }],
     ],
     ["Spanning tree tuning and protection", "Troubleshooting layer 2 loops"],
   ]),
@@ -147,7 +146,7 @@ export const skills: Skill[] = [
     [["The command line: first steps", { lab: "fix-the-port" }], "Ping and traceroute"],
     [
       ["Getting a client online: Windows, macOS and Linux", { lesson: "client-connectivity", topic: "CCNA 2.0 · 1.6" }],
-      ["Troubleshooting with show, ping, traceroute and capture", { topic: D2 }],
+      ["Troubleshooting with show, ping, traceroute and capture", { topic: "CCNA 2.0 · 2.4", lesson: "l2-troubleshooting" }],
       ["Ways to manage a network", { topic: D5 }],
       ["SNMP", { topic: D5 }],
       ["Syslog messages", { topic: D5 }],

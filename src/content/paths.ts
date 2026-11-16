@@ -1,4 +1,5 @@
 import { ccna1, ccnaPlanned } from "./ccna1";
+import { ccna2 } from "./ccna2";
 import type { Lesson, Question, Stage } from "./types";
 import { zero } from "./zero";
 
@@ -12,7 +13,7 @@ export interface Path {
 }
 
 export const paths: Path[] = [
-  { id: "net", name: "Networking", goal: "From “what is a network?” to CCNA, then CCNP.", color: "net", stages: [zero, ccna1, ...ccnaPlanned] },
+  { id: "net", name: "Networking", goal: "From “what is a network?” to CCNA, then CCNP.", color: "net", stages: [zero, ccna1, ccna2, ...ccnaPlanned] },
   { id: "cloud", name: "Cloud Engineer", goal: "From “what is the cloud?” to running real systems on AWS.", color: "cloud", stages: [], outline: ["What the cloud is and how you pay for it", "Servers, storage and databases on AWS", "Cloud networking: VPCs, subnets and gateways", "Identity, access and security", "Infrastructure as code", "Containers and Kubernetes", "Monitoring, cost and reliability"] },
   { id: "ai", name: "AI Infrastructure", goal: "The computers, networks and storage behind AI systems.", color: "ai", stages: [], outline: ["What AI workloads need from hardware", "GPUs and accelerated servers", "High-speed data center networks", "Storage for training data", "Clusters and scheduling", "Running models in production", "Power, cooling and cost"] },
 ];

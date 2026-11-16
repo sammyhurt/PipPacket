@@ -179,5 +179,40 @@ export const missions: Mission[] = [
     skills: ["VLANs and access ports", "Trunks"],
     done: "The same two VLANs now run across both buildings over a single cable. That is what a trunk is for.",
   },
+  {
+    id: "departments-talk",
+    title: "Let the departments talk",
+    minutes: 12,
+    story: "Sales and Engineering now sit in separate VLANs, each with its own IP network. They need to reach each other after all, in a controlled way. Turn the switch into their router.",
+    know: ["Devices in different VLANs are on different networks, so they need a **router** between them.", "A multilayer switch can do the routing itself. You give it an address in each VLAN with a **switch virtual interface** (SVI): `interface vlan 10`.", "That address is the **default gateway** for every PC in the VLAN.", "The switch only routes between its VLANs once `ip routing` is turned on."],
+    commands: ["configure terminal", "ip routing", "interface vlan 10", "ip address 192.168.10.1 255.255.255.0", "no shutdown", "interface vlan 20", "ip address 192.168.20.1 255.255.255.0", "no shutdown", "end", "show ip interface brief"],
+    hints: ["The VLANs and access ports are already set up. Check with `show vlan brief`.", "Give the switch 192.168.10.1 in VLAN 10 and 192.168.20.1 in VLAN 20.", "Each PC needs a default gateway: the switch's address in its own VLAN. PC1 and PC2 use 192.168.10.1. PC3 and PC4 use 192.168.20.1.", "If a PC can ping its gateway but not the other department, look for `ip routing` in `show running-config`."],
+    start: () =>
+      build(
+        [["switch", "S1", 400, 100], ["pc", "PC1", 110, 300, { ip: "192.168.10.11" }], ["pc", "PC2", 300, 330, { ip: "192.168.10.12" }], ["pc", "PC3", 500, 330, { ip: "192.168.20.13" }], ["pc", "PC4", 690, 300, { ip: "192.168.20.14" }]],
+        [["PC1", "Eth0", "S1", G(1)], ["PC2", "Eth0", "S1", G(2)], ["PC3", "Eth0", "S1", G(3)], ["PC4", "Eth0", "S1", G(4)]],
+        (by) => {
+          by.S1.vlans = { 1: "default", 10: "Sales", 20: "Engineering" };
+          [1, 2].forEach((n) => (ifOf(by.S1, G(n))!.vlan = 10));
+          [3, 4].forEach((n) => (ifOf(by.S1, G(n))!.vlan = 20));
+        },
+      ),
+    goals: [
+      {
+        text: "S1 has an address in VLAN 10 and in VLAN 20",
+        test: (net) => {
+          const d = named(net, "S1");
+          const miss = [10, 20].find((v) => !d?.svis[v]?.ip || d.svis[v].shut);
+          return miss ? { ok: false, why: `interface vlan ${miss} has no address yet, or is shut down.` } : { ok: true };
+        },
+      },
+      reach("PC1", "S1"),
+      reach("PC1", "PC3"),
+      reach("PC2", "PC4"),
+      reach("PC4", "PC1"),
+    ],
+    skills: ["SVIs and routing between VLANs"],
+    done: "The switch is now the gateway for both departments. Because all traffic between them passes through it, this is also where you would later add rules about who may talk to whom.",
+  },
 ];
 export const missionById = (id: string) => missions.find((m) => m.id === id);
