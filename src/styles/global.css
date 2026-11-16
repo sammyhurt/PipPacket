@@ -7,8 +7,9 @@
    Palette: Albescent White, Blue Coal, Spanish Pink, Terra Cotta and Peach Fuzz,
    with a berry and a burgundy for buttons and text. The warm colors are fills
    with dark text on them; they are too light to be text on the page themselves.
-   Look: flat color, thick outlines and hard offset shadows. Playful on the map
-   and rewards, calm on lesson pages.
+   Look: taken from thebrices.co. Playfair Display capitals with a script first
+   letter, small wide-spaced Arimo labels, fine lines, nearly square corners,
+   glass pills for navigation. The map and rewards keep a little play.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root {
   --paper: #f7e9de;       /* Albescent White: page */
@@ -27,8 +28,8 @@
   --sun: #ffbe98;         /* rewards */
   --good: #2c7a57;
   --bad: #9b1c1c;
-  --edge: #471f28;        /* chunky outline */
-  --drop: #471f28;        /* hard shadow */
+  --edge: rgb(71 31 40 / 0.22); /* fine lines */
+  --drop: rgb(71 31 40 / 0.5);  /* soft shadow */
   --code-bg: #3a1820;
   --code-fg: #f7e9de;
 }
@@ -36,14 +37,14 @@
   :root:not([data-theme="light"]) {
     --paper: #2a1218; --card: #3a1b23; --ink: #f7e9de; --soft: #d6bdb2; --line: #5a323c; --tint: #45222b;
     --main: #ee7396; --main-ink: #2a1218; --net: #ea785b; --net-ink: #2a1218; --cloud: #f0bbb4; --ai: #ffbe98; --ai-ink: #2a1218; --sun: #ffbe98;
-    --good: #7fd3a8; --bad: #ff8f85; --edge: #f7e9de; --drop: #12060a; --code-bg: #1c0b10; --code-fg: #f7e9de;
+    --good: #7fd3a8; --bad: #ff8f85; --edge: rgb(247 233 222 / 0.24); --drop: rgb(0 0 0 / 0.6); --code-bg: #1c0b10; --code-fg: #f7e9de;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #2a1218; --card: #3a1b23; --ink: #f7e9de; --soft: #d6bdb2; --line: #5a323c; --tint: #45222b;
   --main: #ee7396; --main-ink: #2a1218; --net: #ea785b; --net-ink: #2a1218; --cloud: #f0bbb4; --ai: #ffbe98; --ai-ink: #2a1218; --sun: #ffbe98;
-  --good: #7fd3a8; --bad: #ff8f85; --edge: #f7e9de; --drop: #12060a; --code-bg: #1c0b10; --code-fg: #f7e9de;
+  --good: #7fd3a8; --bad: #ff8f85; --edge: rgb(247 233 222 / 0.24); --drop: rgb(0 0 0 / 0.6); --code-bg: #1c0b10; --code-fg: #f7e9de;
   color-scheme: dark;
 }
 
@@ -67,29 +68,37 @@
   --color-edge: var(--edge);
   --color-code-bg: var(--code-bg);
   --color-code-fg: var(--code-fg);
-  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque", "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-sans: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-script: "Pinyon Script", "Playfair Display", cursive;
+  --font-label: "Arimo", Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Arimo", Arial, ui-sans-serif, system-ui, sans-serif; /* labels and numbers, as on thebrices.co */
+  --font-code: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
 html { scroll-behavior: smooth; }
-body { background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-wrap: break-word; }
-h1, h2, h3 { font-family: var(--font-display); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
-:focus-visible { outline: 3px solid var(--main); outline-offset: 3px; border-radius: 6px; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-wrap: break-word; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; line-height: 1.15; letter-spacing: 0.01em; text-wrap: balance; }
+:focus-visible { outline: 2px solid var(--main); outline-offset: 3px; border-radius: 4px; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 
 /* the page gutter, clear of a phone's side bars */
-.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-/* the signature look: thick outline + hard shadow that presses in when used */
-.chunk { border: 2px solid var(--edge); border-radius: 18px; box-shadow: 4px 4px 0 var(--drop); background: var(--card); }
-.press { transition: transform 0.08s, box-shadow 0.08s; }
-.press:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: 3px 3px 0 var(--drop); }
-.press:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--drop); }
+.gutter { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+/* a card: fine line, soft fill, nearly square */
+.chunk { border: 1px solid var(--edge); border-radius: 4px; background: var(--card); }
+.press { transition: transform 0.25s, box-shadow 0.25s, background-color 0.25s; }
+.press:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 18px 30px -22px var(--drop); }
+/* the floating navigation pills */
+.glass { background: color-mix(in srgb, var(--card) 62%, transparent); border: 1px solid var(--edge); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); box-shadow: 0 10px 30px -20px var(--drop); }
+/* reading text in lessons and tools: the clean sans, for long technical passages */
+.read { font-family: var(--font-label); }
 .prose-lesson > * { min-width: 0; }
 .prose-lesson p { max-width: 66ch; }
-.pop { animation: pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
-@keyframes pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.bob { animation: bob 1.6s ease-in-out infinite; }
+.pop { animation: pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes pop { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+.bob { animation: bob 1.8s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translateY(-5px); } }
-@media (prefers-reduced-motion: reduce) { .pop, .bob { animation: none; } html { scroll-behavior: auto; } .press { transition: none; } }
+.rise { opacity: 0; transform: translateY(24px); }
+.rise.in { opacity: 1; transform: none; transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) { .pop, .bob { animation: none; } html { scroll-behavior: auto; } .press { transition: none; } .rise { opacity: 1; transform: none; } }

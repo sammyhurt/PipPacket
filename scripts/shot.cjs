@@ -1,7 +1,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 (async () => {
-  const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;font:14px system-ui}[hidden]{display:none!important}img{max-width:100%}</style></head><body>' + fs.readFileSync('dist/hopcount-preview.html', 'utf8') + '</body></html>';
+  const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;font:14px system-ui}[hidden]{display:none!important}img{max-width:100%}</style><style>@font-face{font-family:Playfair Display;src:url(file:///home/claude/brices-site/node_modules/@fontsource-variable/playfair-display/files/playfair-display-latin-wght-normal.woff2);font-weight:400 900}@font-face{font-family:Playfair Display;font-style:italic;src:url(file:///home/claude/brices-site/node_modules/@fontsource-variable/playfair-display/files/playfair-display-latin-wght-italic.woff2);font-weight:400 900}@font-face{font-family:Pinyon Script;src:url(file:///home/claude/brices-site/node_modules/@fontsource/pinyon-script/files/pinyon-script-latin-400-normal.woff2)}@font-face{font-family:Arimo;src:url(file:///home/claude/brices-site/node_modules/@fontsource/arimo/files/arimo-latin-400-normal.woff2);font-weight:400}@font-face{font-family:Arimo;src:url(file:///home/claude/brices-site/node_modules/@fontsource/arimo/files/arimo-latin-700-normal.woff2);font-weight:700}</style></head><body>' + fs.readFileSync('dist/hopcount-preview.html', 'utf8') + '</body></html>';
   fs.writeFileSync('dist/wrapped.html', html);
   const b = await chromium.launch();
   const out = process.argv[2];
@@ -23,7 +23,7 @@ const fs = require('fs');
     await p.locator('#check').scrollIntoViewIfNeeded(); await p.screenshot({ path: `${out}/h-${n}-done.png` });
     // subnet trainer: compute answer in page and submit
     await p.evaluate(() => location.hash = 'practice-subnet'); await p.waitForTimeout(300);
-    const txt = await p.locator('p.font-mono.text-2xl').innerText(); const [ip, pre] = txt.replace(/\s/g, '').split('/');
+    const txt = await p.locator('p.font-code.text-2xl').innerText(); const [ip, pre] = txt.replace(/\s/g, '').split('/');
     const o = ip.split('.').map(Number); const n32 = ((o[0] << 24) | (o[1] << 16) | (o[2] << 8) | o[3]) >>> 0; const mask = (0xffffffff << (32 - pre)) >>> 0; const net = (n32 & mask) >>> 0; const bc = (net | (~mask >>> 0)) >>> 0; const s = v => [v >>> 24, (v >>> 16) & 255, (v >>> 8) & 255, v & 255].join('.');
     await p.fill('#sub-net', s(net)); await p.fill('#sub-bc', s(bc)); await p.fill('#sub-hosts', String(2 ** (32 - pre) - 2)); await p.getByRole('button', { name: 'Check' }).click(); await p.waitForTimeout(200);
     const sub = await p.locator('[aria-live] p').first().innerText(); await p.screenshot({ path: `${out}/h-${n}-subnet.png` }); await over('subnet');
