@@ -14,9 +14,15 @@ export interface Progress {
   boxes: Record<string, { box: number; due: string }>; // flashcard key -> spaced-repetition slot
   subnet: number; // subnetting answers right, all time
   theme: "" | "light" | "dark";
+  band: Band; // who is learning; "" until they choose
+  stars: Record<string, number>; // kids' activities finished -> stars earned
 }
+export type Band = "" | "5-7" | "8-10" | "11-13" | "14-17" | "adult";
+/** Under 13: no sharing, no links out, no tracking of any kind. */
+export const isChild = (b: Band) => b === "5-7" || b === "8-10" || b === "11-13";
+export const isLittle = (b: Band) => b === "5-7" || b === "8-10";
 const KEY = "hopcount-progress-v1";
-const blank: Progress = { done: {}, best: {}, skipped: [], placed: false, xp: 0, days: [], boxes: {}, subnet: 0, theme: "" };
+const blank: Progress = { done: {}, best: {}, skipped: [], placed: false, xp: 0, days: [], boxes: {}, subnet: 0, theme: "", band: "", stars: {} };
 
 export const today = () => new Date().toISOString().slice(0, 10);
 export const addDays = (day: string, n: number) => new Date(Date.parse(day) + n * 864e5).toISOString().slice(0, 10);
@@ -67,11 +73,17 @@ export const actions = {
   subnetRight() {
     set(touch({ ...state, subnet: state.subnet + 1, xp: state.xp + 2 }));
   },
+  band(band: Band) {
+    set({ ...state, band });
+  },
+  star(id: string, n: number) {
+    set(touch({ ...state, stars: { ...state.stars, [id]: Math.max(n, state.stars[id] ?? 0) } }));
+  },
   theme(theme: Progress["theme"]) {
     set({ ...state, theme });
   },
   reset() {
-    set({ ...blank, theme: state.theme });
+    set({ ...blank, theme: state.theme, band: state.band });
   },
 };
 

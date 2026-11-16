@@ -35,7 +35,7 @@ export function CopyBtn({ text, label, tone = "plain" }: { text: string; label: 
           label
         )}
       </Btn>
-      {state === "manual" ? <input readOnly value={text} aria-label="Copy this text" onFocus={(e) => e.currentTarget.select()} className="border-edge bg-card h-10 w-72 max-w-full rounded-sm border px-3 font-code text-xs" /> : null}
+      {state === "manual" ? <input readOnly value={text} aria-label="Copy this text" onFocus={(e) => e.currentTarget.select()} className="border-line bg-card h-10 w-72 max-w-full rounded-xl border px-3 font-code text-xs" /> : null}
     </span>
   );
 }
@@ -66,19 +66,19 @@ export function ShareCard() {
       cv.height = H;
       const c = cv.getContext("2d");
       if (!c) return;
-      const ink = "#471f28";
-      c.fillStyle = "#f7e9de";
+      const ink = "#1f2147";
+      c.fillStyle = "#fefdf9";
       c.fillRect(0, 0, W, H);
       c.fillStyle = ink;
-      roundRect(c, 72, 172, W - 144, 760, 8);
-      c.fillStyle = "#be3c63";
-      roundRect(c, 72, 172, W - 144, 760, 8);
+      roundRect(c, 72, 172, W - 144, 760, 48);
+      c.fillStyle = "#5560c0";
+      roundRect(c, 72, 172, W - 144, 760, 48);
       c.fill();
       c.fillStyle = "#ffffff";
-      c.font = "400 30px 'Arimo', sans-serif";
-      c.fillText("M Y   P R O G R E S S", 136, 270);
-      c.font = "400 132px 'Playfair Display', serif";
-      const words = headline.toUpperCase().split(" ");
+      c.font = "700 30px 'Plus Jakarta Sans', sans-serif";
+      c.fillText("MY PROGRESS", 136, 270);
+      c.font = "800 128px 'Plus Jakarta Sans', sans-serif";
+      const words = headline.split(" ");
       let line = "";
       let y = 470;
       for (const w of words) {
@@ -90,7 +90,7 @@ export function ShareCard() {
         line += w + " ";
       }
       c.fillText(line.trim(), 130, y);
-      c.font = "400 40px 'Arimo', sans-serif";
+      c.font = "500 40px 'Plus Jakarta Sans', sans-serif";
       c.fillText(sub, 136, 850);
       // the trail of stops along the bottom
       const n = Math.min(allLessons.length, 14);
@@ -99,17 +99,17 @@ export function ShareCard() {
         const yy = 1060 + (i % 2 ? 34 : 0);
         c.beginPath();
         c.arc(x, yy, 26, 0, Math.PI * 2);
-        c.fillStyle = p.done[allLessons[i].id] ? ink : "#fffaf5";
+        c.fillStyle = p.done[allLessons[i].id] ? ink : "#c7f3f6";
         c.fill();
         c.lineWidth = 6;
         c.strokeStyle = ink;
         c.stroke();
       }
       c.fillStyle = ink;
-      c.font = "400 46px 'Playfair Display', serif";
-      c.fillText("H O P C O U N T", 110, 1250);
-      c.font = "400 30px 'Arimo', sans-serif";
-      c.fillStyle = "#515559";
+      c.font = "800 48px 'Plus Jakarta Sans', sans-serif";
+      c.fillText("hopcount", 110, 1250);
+      c.font = "700 30px 'Plus Jakarta Sans', sans-serif";
+      c.fillStyle = "#575b86";
       c.textAlign = "right";
       c.fillText("Learn how the internet really works", W - 110, 1248);
       setSrc(cv.toDataURL("image/png"));
@@ -121,10 +121,10 @@ export function ShareCard() {
   }, [headline, sub, p.done]);
   return (
     <div className="grid items-start gap-5 sm:grid-cols-[minmax(0,15rem)_1fr]">
-      {src ? <img src={src} alt={`Share card: ${headline}. ${sub}.`} className="border-edge w-full rounded-sm border" /> : <div className="border-line aspect-[4/5] w-full rounded-sm border border-dashed" />}
+      {src ? <img src={src} alt={`Share card: ${headline}. ${sub}.`} className="border-line w-full rounded-xl border" /> : <div className="border-line aspect-[4/5] w-full rounded-xl border border-dashed" />}
       <div>
         <p className="text-soft max-w-[52ch]">Post your progress and bring a friend along. Press and hold the picture (or right-click it) to save it, then paste the caption.</p>
-        <p className="border-line bg-card mt-3 max-w-[52ch] rounded-sm border px-3 py-2 text-sm">{caption}</p>
+        <p className="border-line bg-card mt-3 max-w-[52ch] rounded-xl border px-3 py-2 text-sm">{caption}</p>
         <div className="mt-3">
           <CopyBtn text={caption} label="Copy the caption" />
         </div>
@@ -155,7 +155,7 @@ export const challengeLink = (seed: number, score: number) => `${location.href.s
 export function ChallengeInvite({ seed, right, total }: { seed: number; right: number; total: number }) {
   return (
     <div className="border-line mt-6 border-t pt-5">
-      <h3 className="text-xl font-normal">Challenge a friend</h3>
+      <h3 className="text-xl font-bold">Challenge a friend</h3>
       <p className="text-soft mt-1 max-w-[56ch]">
         Send this link. They get the same {total} questions and see your {right} to beat.
       </p>
@@ -178,7 +178,7 @@ export function Challenge({ code }: { code: string }) {
   if (!m || theirs > qs.length)
     return (
       <div className="gutter mx-auto max-w-2xl py-16 text-center">
-        <h1 className="text-4xl font-normal">That challenge link is incomplete.</h1>
+        <h1 className="text-4xl font-bold">That challenge link is incomplete.</h1>
         <p className="text-soft mt-2">Ask your friend to copy it again.</p>
         <Btn className="mt-6" onClick={() => go("practice-quiz")}>
           Start your own quiz <Arrow />
@@ -188,7 +188,7 @@ export function Challenge({ code }: { code: string }) {
   return (
     <div ref={top} className="gutter mx-auto max-w-2xl py-10">
       <Tag className="bg-main text-main-ink">Challenge</Tag>
-      <Display as="h1" className="mt-5">{`A friend scored ${theirs} out of ${qs.length}. Your turn.`}</Display>
+      <Display as="h1" className="mt-3">{`A friend scored ${theirs} out of ${qs.length}. Your turn.`}</Display>
       {mine === null && !going ? (
         <>
           <p className="text-soft mt-3 max-w-[56ch]">Same ten questions, covering networking from the basics to CCNA level. Each answer comes with the reason, so you learn something even when you miss.</p>
@@ -202,7 +202,7 @@ export function Challenge({ code }: { code: string }) {
         </div>
       ) : (
         <div className="chunk pop mt-6 p-6">
-          <h2 className="text-3xl font-normal">{mine > theirs ? "You win." : mine === theirs ? "It's a tie." : "They keep the lead."}</h2>
+          <h2 className="text-3xl font-bold">{mine > theirs ? "You win." : mine === theirs ? "It's a tie." : "They keep the lead."}</h2>
           <p className={cn("mt-2 font-mono text-lg font-semibold")}>
             You {mine} · Friend {theirs}
           </p>
@@ -227,14 +227,14 @@ export function People() {
   return (
     <section>
       <Title eyebrow="Tech needs more women in it">People who started where you are</Title>
-      <p className="text-soft mt-6 max-w-[60ch] text-lg">Meet engineers who began with no background and are doing this work now.</p>
+      <p className="text-soft mt-2 max-w-[60ch]">Meet engineers who began with no background and are doing this work now.</p>
       <div className="mt-5 grid gap-4 md:grid-cols-3">
         {slots.map((s, i) => (
           <div key={s} className="border-line flex flex-col rounded-[18px] border border-dashed p-5">
-            <span className={cn("border-edge grid size-14 place-items-center rounded-full border font-mono text-xs font-bold text-[#471f28]", ["bg-net", "bg-cloud", "bg-ai"][i])}>photo</span>
+            <span className={cn("border-line grid size-14 place-items-center rounded-full border font-mono text-xs font-bold text-on", ["bg-net", "bg-cloud", "bg-ai"][i])}>photo</span>
             <p className="mt-4 font-bold">{s}</p>
             <p className="text-soft mt-1 text-sm">Her name, role and two lines in her own words go here.</p>
-            <span className="text-soft mt-3 font-label text-[10px] tracking-[0.22em] uppercase">Placeholder · needs a real person</span>
+            <span className="text-soft mt-3 text-xs font-bold tracking-wide">Placeholder · needs a real person</span>
           </div>
         ))}
       </div>

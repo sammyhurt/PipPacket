@@ -33,7 +33,7 @@ export function Quiz({ questions, onDone, doneLabel = "Finish" }: { questions: Q
   };
   return (
     <div>
-      <p className="text-soft font-label text-[11px] tracking-[0.24em] uppercase">
+      <p className="text-soft text-xs font-bold tracking-wide">
         Question {i + 1} of {questions.length}
       </p>
       <h3 className="mt-2 text-xl sm:text-2xl">
@@ -50,14 +50,14 @@ export function Quiz({ questions, onDone, doneLabel = "Finish" }: { questions: Q
               disabled={show}
               onClick={() => setPicked(n)}
               className={cn(
-                "border-edge flex items-center gap-3 rounded-sm border px-4 py-3 text-left text-[15px] font-medium",
+                "border-line flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-[15px] font-medium",
                 !show && "bg-card hover:bg-tint",
                 show && isRight && "bg-good/15 border-good",
                 show && !isRight && picked === n && "bg-bad/15 border-bad",
                 show && !isRight && picked !== n && "bg-card opacity-60",
               )}
             >
-              <span className="border-edge grid size-7 shrink-0 place-items-center rounded-full border font-mono text-xs font-bold">{show && isRight ? <Check className="size-4" /> : String.fromCharCode(65 + n)}</span>
+              <span className="border-line grid size-7 shrink-0 place-items-center rounded-full border font-mono text-xs font-bold">{show && isRight ? <Check className="size-4" /> : String.fromCharCode(65 + n)}</span>
               <span className="min-w-0">
                 <Rich text={o} />
               </span>
@@ -100,11 +100,11 @@ export function OrderIt({ prompt, items }: { prompt: string; items: string[] }) 
   };
   return (
     <div className="chunk bg-tint p-4 sm:p-5">
-      <p className="font-label text-[11px] tracking-[0.24em] uppercase">Try it</p>
+      <p className="text-xs font-bold tracking-wide">Try it</p>
       <p className="mt-1 font-bold">{prompt}</p>
       <ol className="mt-3 grid gap-2">
         {picked.map((s, i) => (
-          <li key={s} className="pop border-good bg-good/15 flex items-center gap-3 rounded-sm border px-3 py-2 text-sm font-medium">
+          <li key={s} className="pop border-good bg-good/15 flex items-center gap-3 rounded-xl border px-3 py-2 text-sm font-medium">
             <span className="font-mono font-bold">{i + 1}</span> <Rich text={s} />
           </li>
         ))}
@@ -114,7 +114,7 @@ export function OrderIt({ prompt, items }: { prompt: string; items: string[] }) 
           {mixed
             .filter((s) => !picked.includes(s))
             .map((s) => (
-              <button key={s} type="button" onClick={() => tap(s)} className={cn("border-edge bg-card rounded-sm border px-3 py-2 text-left text-sm font-medium", wrong === s && "border-bad bg-bad/15")}>
+              <button key={s} type="button" onClick={() => tap(s)} className={cn("border-line bg-card rounded-xl border px-3 py-2 text-left text-sm font-medium", wrong === s && "border-bad bg-bad/15")}>
                 <Rich text={s} />
               </button>
             ))}
@@ -144,13 +144,13 @@ export function BinaryDrill() {
   const hit = sum === target;
   return (
     <div className="chunk bg-tint p-4 sm:p-5">
-      <p className="font-label text-[11px] tracking-[0.24em] uppercase">Try it</p>
+      <p className="text-xs font-bold tracking-wide">Try it</p>
       <p className="mt-1 font-bold">
-        Switch on the bits that add up to <span className="bg-sun rounded-sm px-2 py-0.5 font-code text-[#471f28]">{target}</span>
+        Switch on the bits that add up to <span className="bg-sun rounded-xl px-2 py-0.5 font-code text-on">{target}</span>
       </p>
       <div className="mt-4 grid grid-cols-8 gap-1.5 sm:gap-2">
         {BITS.map((b, i) => (
-          <button key={b} type="button" aria-pressed={on[i]} aria-label={`${b}`} disabled={hit} onClick={() => setOn(on.map((v, n) => (n === i ? !v : v)))} className={cn("border-edge flex flex-col items-center rounded-sm border py-2 font-code", on[i] ? "bg-main text-main-ink" : "bg-card")}>
+          <button key={b} type="button" aria-pressed={on[i]} aria-label={`${b}`} disabled={hit} onClick={() => setOn(on.map((v, n) => (n === i ? !v : v)))} className={cn("border-line flex flex-col items-center rounded-xl border py-2 font-code", on[i] ? "bg-main text-main-ink" : "bg-card")}>
             <span className="text-[10px] opacity-80 sm:text-xs">{b}</span>
             <span className="text-xl font-bold sm:text-2xl">{on[i] ? 1 : 0}</span>
           </button>
@@ -233,14 +233,14 @@ export function SubnetTrainer() {
   const field = (label: string, v: string, set: (s: string) => void, good: boolean, id: string, ph: string) => (
     <label className="grid gap-1 text-sm font-semibold" htmlFor={id}>
       {label}
-      <input id={id} value={v} onChange={(e) => set(e.target.value)} disabled={checked} inputMode="decimal" autoComplete="off" placeholder={ph} className={cn("border-edge bg-card h-11 rounded-sm border px-3 font-code text-base font-medium", checked && (good ? "border-good bg-good/10" : "border-bad bg-bad/10"))} />
+      <input id={id} value={v} onChange={(e) => set(e.target.value)} disabled={checked} inputMode="decimal" autoComplete="off" placeholder={ph} className={cn("border-line bg-card h-11 rounded-xl border px-3 font-code text-base font-medium", checked && (good ? "border-good bg-good/10" : "border-bad bg-bad/10"))} />
     </label>
   );
   return (
     <div className="chunk p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="font-label text-[11px] tracking-[0.24em] uppercase">Subnetting trainer</p>
-        <div className="border-edge flex rounded-full border p-0.5 text-xs font-bold" role="group" aria-label="Difficulty">
+        <p className="text-xs font-bold tracking-wide">Subnetting trainer</p>
+        <div className="border-line flex rounded-full border p-0.5 text-xs font-bold" role="group" aria-label="Difficulty">
           {[false, true].map((h) => (
             <button key={String(h)} type="button" aria-pressed={hard === h} onClick={() => (setHard(h), fresh(h))} className={cn("rounded-full px-3 py-1", hard === h && "bg-ink text-paper")}>
               {h ? "Any octet" : "Last octet"}
@@ -301,7 +301,7 @@ export function SubnetTrainer() {
 export function Stack({ title, rows, note }: { title: string; rows: [string, string][]; note?: string }) {
   return (
     <figure className="chunk overflow-hidden">
-      <figcaption className="border-edge bg-tint border-b px-4 py-2 font-label text-[11px] tracking-[0.24em] uppercase">{title}</figcaption>
+      <figcaption className="border-line bg-tint border-b px-4 py-2 text-xs font-bold tracking-wide">{title}</figcaption>
       <div className="grid">
         {rows.map(([a, b], i) => (
           <div key={a} className={cn("grid grid-cols-[minmax(0,10.5rem)_1fr] items-center gap-3 px-4 py-2.5 text-[15px]", i && "border-line border-t")} style={{ background: `color-mix(in srgb, var(--main) ${Math.round(((rows.length - i) / rows.length) * 16)}%, transparent)` }}>

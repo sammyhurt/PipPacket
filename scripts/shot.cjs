@@ -10,6 +10,7 @@ const fs = require('fs');
     const p = await ctx.newPage();
     const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && !/fonts|ERR_/.test(m.text()) && errs.push(m.text().slice(0, 120)));
     await p.goto('file://' + process.cwd() + '/dist/wrapped.html'); await p.waitForTimeout(700);
+    await p.screenshot({ path: `${out}/h-${n}-who.png` }); await p.getByRole('button', { name: /Adult/ }).click(); await p.waitForTimeout(400);
     const over = async (tag) => { const o = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth); if (o > 0) console.log(n, tag, 'OVERFLOW', o); };
     await p.screenshot({ path: `${out}/h-${n}-home.png` }); await over('home');
     await p.evaluate(() => location.hash = 'map'); await p.waitForTimeout(300); await p.screenshot({ path: `${out}/h-${n}-map.png` }); await over('map');
