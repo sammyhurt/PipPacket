@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 
 import { bandById } from "@/content/kids";
+import { LabHome, LabRun } from "@/lab/Lab";
 import { cn } from "@/lib/utils";
 
 import { GrownUps, KidsHome, LightsGame, PipGame } from "./kids";
@@ -20,6 +21,7 @@ const ICONS = {
   learn: icon("M5 19c3-1 3-5 6-6s3-5 6-6M5 19h.01M12 13h.01M19 6h.01"),
   practice: icon("M13 3L5 14h6l-1 7 8-11h-6z"),
   progress: icon("M5 20V10M12 20V4M19 20v-7"),
+  lab: icon("M9 3v6l-5 9a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-9V3M8 3h8M7.5 15h9"),
   people: icon("M16 19v-1a4 4 0 0 0-8 0v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"),
 };
 
@@ -44,6 +46,8 @@ export default function App() {
   else if (route === "start") page = <Start />;
   else if (route === "me") page = <Me />;
   else if (route.startsWith("lesson-")) page = <LessonPage id={route.slice(7)} />;
+  else if (route === "lab") page = <LabHome />;
+  else if (route.startsWith("lab-")) page = <LabRun key={route} id={route.slice(4)} />;
   else if (route.startsWith("practice-")) page = <Practice tool={route.slice(9)} />;
   else if (route.startsWith("path-")) page = <PathPlan id={route.slice(5)} />;
   else if (route.startsWith("challenge-q-") && !isChild(p.band)) page = <Challenge code={route.slice(12)} />;
@@ -59,10 +63,11 @@ export default function App() {
     : [
         ["", "Home", ICONS.home],
         ["map", "Learn", ICONS.learn],
+        ["lab", "Lab", ICONS.lab],
         ["practice-today", "Practice", ICONS.practice],
         ["me", "Progress", ICONS.progress],
       ];
-  const active = (id: string) => route === id || (id === "" && route.startsWith("play-")) || (id === "map" && (route.startsWith("lesson-") || route === "start" || route.startsWith("path-"))) || (id.startsWith("practice") && route.startsWith("practice"));
+  const active = (id: string) => route === id || (id === "" && route.startsWith("play-")) || (id === "map" && (route.startsWith("lesson-") || route === "start" || route.startsWith("path-"))) || (id.startsWith("practice") && route.startsWith("practice")) || (id === "lab" && route.startsWith("lab-"));
   const Logo = (
     <button type="button" onClick={() => go("")} className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight" aria-label="PipPacket, home">
       <Pip className="w-9" happy />

@@ -16,6 +16,7 @@ export interface Progress {
   theme: "" | "light" | "dark";
   band: Band; // who is learning; "" until they choose
   stars: Record<string, number>; // kids' activities finished -> stars earned
+  labs: Record<string, string>; // lab mission id -> day first finished
   ev: Record<string, { d: string[]; m: number }>; // skill id -> days answered right, and misses in a row
 }
 export type Band = "" | "5-7" | "8-10" | "11-13" | "14-17" | "adult";
@@ -23,7 +24,7 @@ export type Band = "" | "5-7" | "8-10" | "11-13" | "14-17" | "adult";
 export const isChild = (b: Band) => b === "5-7" || b === "8-10" || b === "11-13";
 export const isLittle = (b: Band) => b === "5-7" || b === "8-10";
 const KEY = "pippacket-progress-v1";
-const blank: Progress = { done: {}, best: {}, skipped: [], placed: false, xp: 0, days: [], boxes: {}, subnet: 0, theme: "", band: "", stars: {}, ev: {} };
+const blank: Progress = { done: {}, best: {}, skipped: [], placed: false, xp: 0, days: [], boxes: {}, subnet: 0, theme: "", band: "", stars: {}, labs: {}, ev: {} };
 
 export const today = () => new Date().toISOString().slice(0, 10);
 export const addDays = (day: string, n: number) => new Date(Date.parse(day) + n * 864e5).toISOString().slice(0, 10);
@@ -79,6 +80,11 @@ export const actions = {
     const cur = state.ev[skill] || { d: [], m: 0 };
     const next = right ? { d: cur.d.includes(today()) ? cur.d : [...cur.d, today()].slice(-12), m: 0 } : { d: cur.d, m: cur.m + 1 };
     set(touch({ ...state, ev: { ...state.ev, [skill]: next } }));
+  },
+  lab(id: string) {
+    if (state.labs[id]) return false;
+    set(touch({ ...state, labs: { ...state.labs, [id]: today() }, xp: state.xp + 20 }));
+    return true;
   },
   band(band: Band) {
     set({ ...state, band });
