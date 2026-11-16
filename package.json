@@ -1,9 +1,9 @@
 {
-  "name": "hopcount",
+  "name": "pippacket",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Hopcount (working name): a path-map learning site for networking, cloud and AI infrastructure.",
+  "description": "PipPacket: a path-map learning site for networking, cloud and AI infrastructure.",
   "engines": { "node": ">=22.12.0" },
   "scripts": {
     "dev": "vite",

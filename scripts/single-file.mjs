@@ -4,12 +4,12 @@ const dir = 'dist/assets/';
 const files = readdirSync(dir);
 const css = readFileSync(dir + files.find((f) => f.endsWith('.css')), 'utf8');
 const js = readFileSync(dir + files.find((f) => f.endsWith('.js')), 'utf8').replace(/<\/script/gi, '<\\/script');
-const page = `<title>Hopcount</title>
+const page = `<title>PipPacket</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>${css}</style>
 <div id="root"></div>
 <script type="module">${js}</script>
 `;
-writeFileSync('dist/hopcount-preview.html', page);
+writeFileSync('dist/pippacket-preview.html', page);
 console.log('preview page', (page.length / 1024).toFixed(0) + ' KB');

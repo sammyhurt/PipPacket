@@ -107,7 +107,7 @@ export function ShareCard() {
       }
       c.fillStyle = ink;
       c.font = "800 48px 'Plus Jakarta Sans', sans-serif";
-      c.fillText("hopcount", 110, 1250);
+      c.fillText("PipPacket", 110, 1250);
       c.font = "700 30px 'Plus Jakarta Sans', sans-serif";
       c.fillStyle = "#575b86";
       c.textAlign = "right";

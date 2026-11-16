@@ -21,7 +21,7 @@ export type Band = "" | "5-7" | "8-10" | "11-13" | "14-17" | "adult";
 /** Under 13: no sharing, no links out, no tracking of any kind. */
 export const isChild = (b: Band) => b === "5-7" || b === "8-10" || b === "11-13";
 export const isLittle = (b: Band) => b === "5-7" || b === "8-10";
-const KEY = "hopcount-progress-v1";
+const KEY = "pippacket-progress-v1";
 const blank: Progress = { done: {}, best: {}, skipped: [], placed: false, xp: 0, days: [], boxes: {}, subnet: 0, theme: "", band: "", stars: {} };
 
 export const today = () => new Date().toISOString().slice(0, 10);

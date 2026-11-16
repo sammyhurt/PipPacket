@@ -8,6 +8,7 @@ import { About, Home, LessonPage, MapPage, Me, Missing, PathPlan, Practice, Star
 import { go, useRoute } from "./router";
 import { Challenge } from "./social";
 import { actions, isChild, isLittle, useProgress } from "./store";
+import { Pip } from "./ui";
 
 const icon = (d: string) => (
   <svg viewBox="0 0 24 24" className="size-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -63,9 +64,9 @@ export default function App() {
       ];
   const active = (id: string) => route === id || (id === "" && route.startsWith("play-")) || (id === "map" && (route.startsWith("lesson-") || route === "start" || route.startsWith("path-"))) || (id.startsWith("practice") && route.startsWith("practice"));
   const Logo = (
-    <button type="button" onClick={() => go("")} className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight" aria-label="Hopcount, home">
-      <span className="bg-main text-main-ink grid size-8 place-items-center rounded-lg text-sm">h</span>
-      hopcount
+    <button type="button" onClick={() => go("")} className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight" aria-label="PipPacket, home">
+      <Pip className="w-9" happy />
+      PipPacket
     </button>
   );
   const Theme = (
@@ -136,7 +137,7 @@ export default function App() {
         {page}
         {!little ? (
           <p className="gutter text-soft mx-auto max-w-5xl pt-6 text-xs">
-            Hopcount (working name). A free study aid, not affiliated with Cisco.{" "}
+            PipPacket. A free study aid, not affiliated with Cisco.{" "}
             <button type="button" onClick={() => go("about")} className="underline underline-offset-4 lg:hidden">
               How it works
             </button>

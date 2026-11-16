@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { go } from "./router";
 import { ChallengeInvite, People, seededQuestions, ShareCard } from "./social";
 import { actions, getProgress, isChild, streak, today, useProgress, type Progress } from "./store";
-import { Arrow, Bar, Btn, Check, Display, Eyebrow, Reveal, Rich, Tag, Title } from "./ui";
+import { Arrow, Bar, Btn, Check, Display, Eyebrow, Pip, Reveal, Rich, Tag, Title } from "./ui";
 import { BinaryDrill, OrderIt, Quiz, Stack, SubnetTrainer } from "./widgets";
 
 const wrap = "gutter mx-auto w-full max-w-5xl";
@@ -39,7 +39,8 @@ export function Home() {
       </div>
 
       <section className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-        <div className="chunk flex flex-col p-6 sm:p-7">
+        <div className="chunk relative flex flex-col p-6 sm:p-7">
+          <Pip className="absolute top-5 right-5 hidden w-16 sm:block" happy />
           <Eyebrow>{started ? "Continue" : "Start here"}</Eyebrow>
           {started && next ? (
             <>
@@ -438,6 +439,7 @@ export function LessonPage({ id }: { id: string }) {
       <section className="chunk mt-12 p-5 sm:p-7" id="check">
         {result ? (
           <div className="pop" aria-live="polite">
+            <Pip className="bob mb-3 w-16" happy />
             <p className="text-xs font-bold tracking-wide">Stop complete</p>
             <h2 className="mt-1 text-3xl font-bold">
               {result.score === 1 ? "Perfect score." : result.score >= 0.6 ? "Nice work." : "Done. Worth another look."} {Math.round(result.score * 100)}%
@@ -778,6 +780,7 @@ export function PathPlan({ id }: { id: string }) {
 }
 
 export function About() {
+  const p = useProgress();
   const Q = ({ q, children }: { q: string; children: ReactNode }) => (
     <div className="border-line border-t pt-4">
       <h2 className="text-xl font-bold">{q}</h2>
@@ -788,6 +791,16 @@ export function About() {
     <div className={cn(wrap, "max-w-3xl py-10")}>
       <Display as="h1" className="mt-3">How this site works</Display>
       <div className="mt-8 grid gap-6">
+        <Q q="Why “PipPacket”?">
+          <p>Pip is the little message you help deliver in the youngest learners' first game, and a packet is what every message on the internet is made of. Pip was also the name of a real proposal in the early 1990s for the next version of the Internet Protocol.</p>
+          {isChild(p.band) ? null : (
+            <p className="text-sm">
+              <a href="https://www.rfc-editor.org/rfc/rfc1621.html" target="_blank" rel="noreferrer" className="underline underline-offset-4">
+                RFC 1621: Pip Near-term Architecture
+              </a>
+            </p>
+          )}
+        </Q>
         <Q q="Where do the lessons come from?">
           <p>Every certification stop is tied to one line of the official exam topic list, and its facts are checked against that list, the internet standards (RFCs) and vendor documentation. Each lesson shows its sources and the date it was last checked.</p>
         </Q>

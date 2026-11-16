@@ -106,3 +106,14 @@ export const Arrow = ({ className }: { className?: string }) => (
     <path d="M5 12h14M13 6l6 6-6 6" />
   </svg>
 );
+
+/** Pip: a message with a face. The mascot, and the picture of what a packet is. Drawn here, in the palette. */
+export const Pip = ({ className, happy }: { className?: string; happy?: boolean }) => (
+  <svg viewBox="0 0 80 64" className={className} aria-hidden>
+    <rect x="4" y="8" width="72" height="50" rx="10" fill="var(--pink)" stroke="var(--on)" strokeWidth="3" />
+    <path d="M6 14l34 24 34-24" fill="none" stroke="var(--on)" strokeWidth="3" strokeLinejoin="round" />
+    <circle cx="29" cy="40" r="3.5" fill="var(--on)" />
+    <circle cx="51" cy="40" r="3.5" fill="var(--on)" />
+    <path d={happy ? "M31 47q9 9 18 0" : "M33 49q7 4 14 0"} fill="none" stroke="var(--on)" strokeWidth="3" strokeLinecap="round" />
+  </svg>
+);

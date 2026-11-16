@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 import { go } from "./router";
 import { actions, useProgress } from "./store";
-import { Arrow, Btn, Check } from "./ui";
+import { Arrow, Btn, Check, Pip } from "./ui";
 
 const fill = { pink: "bg-pink", aqua: "bg-aqua", sky: "bg-sky", lav: "bg-lav", peri: "bg-peri" } as const;
 
@@ -58,15 +58,6 @@ function Say({ text, auto, big }: { text: string; auto: boolean; big?: boolean }
 
 /* ───────────── pictures (all drawn here; no photos of children, ever) ───────────── */
 
-const Pip = ({ className, happy }: { className?: string; happy?: boolean }) => (
-  <svg viewBox="0 0 80 64" className={className} aria-hidden>
-    <rect x="4" y="8" width="72" height="50" rx="10" fill="var(--pink)" stroke="var(--on)" strokeWidth="3" />
-    <path d="M6 14l34 24 34-24" fill="none" stroke="var(--on)" strokeWidth="3" strokeLinejoin="round" />
-    <circle cx="29" cy="40" r="3.5" fill="var(--on)" />
-    <circle cx="51" cy="40" r="3.5" fill="var(--on)" />
-    <path d={happy ? "M31 47q9 9 18 0" : "M33 49q7 4 14 0"} fill="none" stroke="var(--on)" strokeWidth="3" strokeLinecap="round" />
-  </svg>
-);
 const House = ({ color, label }: { color: string; label: string }) => (
   <g aria-label={label}>
     <path d="M-34 0L0 -30 34 0v34h-68z" fill={color} stroke="var(--on)" strokeWidth="3" strokeLinejoin="round" />
