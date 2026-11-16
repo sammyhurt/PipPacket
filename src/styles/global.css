@@ -4,41 +4,46 @@
    THE ONLY design-tokens file (same idea as berniebrice.com). Colors, type and
    shadows live here; components only use the names. Light is the base; dark
    follows the visitor's device, or an explicit choice (data-theme).
-   Look: flat color, thick ink outlines and hard offset shadows. Playful on the
-   map and rewards, calm on lesson pages.
+   Palette: Albescent White, Blue Coal, Spanish Pink, Terra Cotta and Peach Fuzz,
+   with a berry and a burgundy for buttons and text. The warm colors are fills
+   with dark text on them; they are too light to be text on the page themselves.
+   Look: flat color, thick outlines and hard offset shadows. Playful on the map
+   and rewards, calm on lesson pages.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  --paper: #f4f3f9;       /* page */
-  --card: #ffffff;
-  --ink: #16141d;         /* text and outlines */
-  --soft: #5b5868;        /* quiet text */
-  --line: #d9d6e4;        /* hairlines */
-  --tint: #ebe8f5;        /* quiet fills */
-  --net: #6c4cff;         /* Networking path */
-  --net-ink: #ffffff;
-  --cloud: #0aa2dc;       /* Cloud path */
-  --ai: #b6ee45;          /* AI infrastructure path */
-  --ai-ink: #16141d;
-  --sun: #ffc83d;         /* rewards */
-  --good: #12996a;
-  --bad: #d93a44;
-  --edge: #16141d;        /* chunky outline */
-  --drop: #16141d;        /* hard shadow */
-  --code-bg: #16141d;
-  --code-fg: #e9e6f7;
+  --paper: #f7e9de;       /* Albescent White: page */
+  --card: #fffaf5;
+  --ink: #471f28;         /* burgundy: text and outlines */
+  --soft: #515559;        /* Blue Coal: quiet text */
+  --line: #e5d0c1;        /* hairlines */
+  --tint: #f4dccf;        /* quiet fills */
+  --main: #be3c63;        /* berry: main buttons, highlights, "you are here" */
+  --main-ink: #ffffff;
+  --net: #ea785b;         /* Terra Cotta: Networking path */
+  --net-ink: #471f28;
+  --cloud: #f0bbb4;       /* Spanish Pink: Cloud path */
+  --ai: #ffbe98;          /* Peach Fuzz: AI infrastructure path */
+  --ai-ink: #471f28;
+  --sun: #ffbe98;         /* rewards */
+  --good: #2c7a57;
+  --bad: #9b1c1c;
+  --edge: #471f28;        /* chunky outline */
+  --drop: #471f28;        /* hard shadow */
+  --code-bg: #3a1820;
+  --code-fg: #f7e9de;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #121019; --card: #1c1927; --ink: #f1eefb; --soft: #a9a4bd; --line: #332e45; --tint: #262233;
-    --net: #9580ff; --net-ink: #121019; --cloud: #45c1f0; --ai: #b6ee45; --ai-ink: #121019; --sun: #ffd15c;
-    --good: #3fd09b; --bad: #ff6b74; --edge: #f1eefb; --drop: #000000; --code-bg: #0b0a10; --code-fg: #e9e6f7;
+    --paper: #2a1218; --card: #3a1b23; --ink: #f7e9de; --soft: #d6bdb2; --line: #5a323c; --tint: #45222b;
+    --main: #ee7396; --main-ink: #2a1218; --net: #ea785b; --net-ink: #2a1218; --cloud: #f0bbb4; --ai: #ffbe98; --ai-ink: #2a1218; --sun: #ffbe98;
+    --good: #7fd3a8; --bad: #ff8f85; --edge: #f7e9de; --drop: #12060a; --code-bg: #1c0b10; --code-fg: #f7e9de;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #121019; --card: #1c1927; --ink: #f1eefb; --soft: #a9a4bd; --line: #332e45; --tint: #262233;
-  --net: #9580ff; --net-ink: #121019; --cloud: #45c1f0; --ai: #b6ee45; --ai-ink: #121019; --sun: #ffd15c;
-  --good: #3fd09b; --bad: #ff6b74; --edge: #f1eefb; --drop: #000000; --code-bg: #0b0a10; --code-fg: #e9e6f7;
+  --paper: #2a1218; --card: #3a1b23; --ink: #f7e9de; --soft: #d6bdb2; --line: #5a323c; --tint: #45222b;
+  --main: #ee7396; --main-ink: #2a1218; --net: #ea785b; --net-ink: #2a1218; --cloud: #f0bbb4; --ai: #ffbe98; --ai-ink: #2a1218; --sun: #ffbe98;
+  --good: #7fd3a8; --bad: #ff8f85; --edge: #f7e9de; --drop: #12060a; --code-bg: #1c0b10; --code-fg: #f7e9de;
   color-scheme: dark;
 }
 
@@ -49,6 +54,8 @@
   --color-soft: var(--soft);
   --color-line: var(--line);
   --color-tint: var(--tint);
+  --color-main: var(--main);
+  --color-main-ink: var(--main-ink);
   --color-net: var(--net);
   --color-net-ink: var(--net-ink);
   --color-cloud: var(--cloud);
@@ -68,7 +75,7 @@
 html { scroll-behavior: smooth; }
 body { background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-wrap: break-word; }
 h1, h2, h3 { font-family: var(--font-display); line-height: 1.05; letter-spacing: -0.02em; text-wrap: balance; }
-:focus-visible { outline: 3px solid var(--net); outline-offset: 3px; border-radius: 6px; }
+:focus-visible { outline: 3px solid var(--main); outline-offset: 3px; border-radius: 6px; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 

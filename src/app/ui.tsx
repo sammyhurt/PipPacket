@@ -27,8 +27,8 @@ export function Rich({ text }: { text: string }) {
 }
 
 const tones = {
-  net: "bg-net text-net-ink",
-  sun: "bg-sun text-[#16141d]",
+  net: "bg-main text-main-ink",
+  sun: "bg-sun text-[#471f28]",
   ai: "bg-ai text-ai-ink",
   plain: "bg-card text-ink",
   ink: "bg-ink text-paper",
@@ -48,7 +48,7 @@ export function Tag({ children, className }: { children: ReactNode; className?: 
 export function Bar({ value, className }: { value: number; className?: string }) {
   return (
     <div className={cn("border-edge bg-card h-3.5 overflow-hidden rounded-full border-2", className)} role="progressbar" aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
-      <div className="bg-net h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.round(value * 100)}%` }} />
+      <div className="bg-main h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.round(value * 100)}%` }} />
     </div>
   );
 }

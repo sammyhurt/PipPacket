@@ -146,11 +146,11 @@ export function BinaryDrill() {
     <div className="chunk bg-tint p-4 sm:p-5">
       <p className="font-mono text-xs font-semibold tracking-wide uppercase">Try it</p>
       <p className="mt-1 font-bold">
-        Switch on the bits that add up to <span className="bg-sun rounded-md px-2 py-0.5 font-mono text-[#16141d]">{target}</span>
+        Switch on the bits that add up to <span className="bg-sun rounded-md px-2 py-0.5 font-mono text-[#471f28]">{target}</span>
       </p>
       <div className="mt-4 grid grid-cols-8 gap-1.5 sm:gap-2">
         {BITS.map((b, i) => (
-          <button key={b} type="button" aria-pressed={on[i]} aria-label={`${b}`} disabled={hit} onClick={() => setOn(on.map((v, n) => (n === i ? !v : v)))} className={cn("border-edge flex flex-col items-center rounded-xl border-2 py-2 font-mono", on[i] ? "bg-net text-net-ink" : "bg-card")}>
+          <button key={b} type="button" aria-pressed={on[i]} aria-label={`${b}`} disabled={hit} onClick={() => setOn(on.map((v, n) => (n === i ? !v : v)))} className={cn("border-edge flex flex-col items-center rounded-xl border-2 py-2 font-mono", on[i] ? "bg-main text-main-ink" : "bg-card")}>
             <span className="text-[10px] opacity-80 sm:text-xs">{b}</span>
             <span className="text-xl font-bold sm:text-2xl">{on[i] ? 1 : 0}</span>
           </button>
@@ -249,7 +249,7 @@ export function SubnetTrainer() {
         </div>
       </div>
       <p className="mt-3 font-mono text-2xl font-semibold sm:text-3xl">
-        {toIp(prob.ip)} <span className="text-net">/{prob.prefix}</span>
+        {toIp(prob.ip)} <span className="text-main">/{prob.prefix}</span>
       </p>
       <form
         className="mt-4 grid gap-3 sm:grid-cols-3"
@@ -304,7 +304,7 @@ export function Stack({ title, rows, note }: { title: string; rows: [string, str
       <figcaption className="border-edge bg-tint border-b-2 px-4 py-2 font-mono text-xs font-semibold tracking-wide uppercase">{title}</figcaption>
       <div className="grid">
         {rows.map(([a, b], i) => (
-          <div key={a} className={cn("grid grid-cols-[minmax(0,10.5rem)_1fr] items-center gap-3 px-4 py-2.5 text-[15px]", i && "border-line border-t")} style={{ background: `color-mix(in srgb, var(--net) ${Math.round(((rows.length - i) / rows.length) * 16)}%, transparent)` }}>
+          <div key={a} className={cn("grid grid-cols-[minmax(0,10.5rem)_1fr] items-center gap-3 px-4 py-2.5 text-[15px]", i && "border-line border-t")} style={{ background: `color-mix(in srgb, var(--main) ${Math.round(((rows.length - i) / rows.length) * 16)}%, transparent)` }}>
             <strong>{a}</strong>
             <span className="text-soft min-w-0">{b}</span>
           </div>

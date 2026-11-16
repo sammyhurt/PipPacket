@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { allCards, allLessons, allQuestions, lessonById, net, paths, placement, stageOf } from "@/content/paths";
+import { allCards, allLessons, lessonById, net, paths, placement, stageOf } from "@/content/paths";
 import type { Block, Lesson } from "@/content/types";
 import { cn } from "@/lib/utils";
 
 import { go } from "./router";
+import { ChallengeInvite, People, seededQuestions, ShareCard } from "./social";
 import { actions, streak, today, useProgress, type Progress } from "./store";
 import { Arrow, Bar, Btn, Check, Rich, Tag } from "./ui";
 import { BinaryDrill, OrderIt, Quiz, Stack, SubnetTrainer } from "./widgets";
@@ -27,7 +28,7 @@ export function Home() {
         <div>
           <Tag className="bg-ai text-ai-ink">Free · no sign-up</Tag>
           <h1 className="mt-4 text-[clamp(2.6rem,7vw,4.6rem)] font-extrabold">
-            Learn how the internet <span className="bg-net text-net-ink box-decoration-clone rounded-xl px-2">really works.</span>
+            Learn how the internet <span className="bg-main text-main-ink box-decoration-clone rounded-xl px-2">really works.</span>
           </h1>
           <p className="text-soft mt-5 max-w-[52ch] text-lg">Short stops on a map instead of long chapters. Each one explains an idea in plain words, lets you try it, then checks it stuck. Start from zero and keep going to certification level.</p>
           <div className="mt-7 flex flex-wrap gap-3">
@@ -63,7 +64,7 @@ export function Home() {
             const ready = total > 0;
             return (
               <button key={path.id} type="button" onClick={() => go(ready ? "map" : "path-" + path.id)} className="chunk press flex flex-col p-5 text-left">
-                <span className={cn("border-edge grid size-12 place-items-center rounded-2xl border-2 font-mono text-lg font-bold", path.color === "net" ? "bg-net text-net-ink" : path.color === "cloud" ? "bg-cloud text-[#16141d]" : "bg-ai text-ai-ink")}>{path.id === "net" ? (
+                <span className={cn("border-edge grid size-12 place-items-center rounded-2xl border-2 font-mono text-lg font-bold", path.color === "net" ? "bg-net text-net-ink" : path.color === "cloud" ? "bg-cloud text-[#471f28]" : "bg-ai text-ai-ink")}>{path.id === "net" ? (
                     "</>"
                   ) : path.id === "cloud" ? (
                     <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinejoin="round" aria-hidden>
@@ -98,14 +99,16 @@ export function Home() {
           ["Make it stick", "A short quiz ends each stop. Flashcards bring back whatever you missed."],
         ].map(([t, d], i) => (
           <div key={t} className="border-line border-t-2 pt-4">
-            <p className="text-net font-mono text-sm font-bold">0{i + 1}</p>
+            <p className="text-main font-mono text-sm font-bold">0{i + 1}</p>
             <h3 className="mt-1 text-xl font-extrabold">{t}</h3>
             <p className="text-soft mt-1.5 text-[15px]">{d}</p>
           </div>
         ))}
       </section>
 
-      <section className="chunk bg-sun p-5 text-[#16141d] sm:p-7">
+      <People />
+
+      <section className="chunk bg-sun p-5 text-[#471f28] sm:p-7">
         <h2 className="text-2xl font-extrabold">Built on the new CCNA, version 2.0</h2>
         <p className="mt-2 max-w-[70ch]">
           Cisco's CCNA exam changes on <strong>3 February 2027</strong>. The certification stops on this map follow the new official topic list. Taking the exam before then? Version 1.1 still applies, and the “Start from zero” stops cover the extra theory it asks for.
@@ -131,7 +134,7 @@ function MiniMap() {
           const here = !done && stops.slice(0, i).every((x) => isDone(p, x.id) || p.skipped.includes(x.id));
           return (
             <div key={l.id} className="relative flex items-center gap-3" style={{ marginLeft: [0, 18, 36, 18][i % 4] }}>
-              <span className={cn("border-edge grid size-10 shrink-0 place-items-center rounded-full border-2 font-mono text-sm font-bold", done ? "bg-net text-net-ink" : here ? "bg-sun bob text-[#16141d]" : "bg-card")}>{done ? <Check /> : i + 1}</span>
+              <span className={cn("border-edge grid size-10 shrink-0 place-items-center rounded-full border-2 font-mono text-sm font-bold", done ? "bg-ink text-paper" : here ? "bg-main bob text-main-ink" : "bg-card")}>{done ? <Check /> : i + 1}</span>
               <span className={cn("truncate text-[15px] font-semibold", !done && !here && "text-soft")}>{l.title}</span>
             </div>
           );
@@ -228,9 +231,9 @@ function Trail({ lessons, nextId }: { lessons: Lesson[]; nextId?: string }) {
         const skipped = !done && p.skipped.includes(l.id);
         return (
           <button key={l.id} id={"stop-" + l.id} type="button" onClick={() => go("lesson-" + l.id)} className="group absolute flex -translate-y-1/2 items-center gap-3 text-left" style={{ left: `calc(${XS[i % 4]}% - 32px)`, top: i * ROW + 40, right: 0 }}>
-            <span className={cn("press border-edge grid size-16 shrink-0 place-items-center rounded-full border-2 font-mono text-lg font-bold shadow-[4px_4px_0_var(--drop)]", done ? "bg-net text-net-ink" : here ? "bg-sun bob text-[#16141d]" : skipped ? "bg-tint text-soft border-dashed" : "bg-card")}>{done ? <Check className="size-7" /> : i + 1}</span>
+            <span className={cn("press border-edge grid size-16 shrink-0 place-items-center rounded-full border-2 font-mono text-lg font-bold shadow-[4px_4px_0_var(--drop)]", done ? "bg-ink text-paper" : here ? "bg-main bob text-main-ink" : skipped ? "bg-tint text-soft border-dashed" : "bg-card")}>{done ? <Check className="size-7" /> : i + 1}</span>
             <span className="min-w-0">
-              {here ? <span className="bg-ink text-paper mb-1 inline-block rounded-full px-2 py-0.5 font-mono text-[10px] font-bold tracking-wide uppercase">You are here</span> : null}
+              {here ? <span className="bg-main text-main-ink mb-1 inline-block rounded-full px-2 py-0.5 font-mono text-[10px] font-bold tracking-wide uppercase">You are here</span> : null}
               <span className="block text-[15px] leading-tight font-bold group-hover:underline sm:text-base">{l.title}</span>
               <span className="text-soft block text-xs">
                 {l.minutes} min{done ? ` · quiz ${Math.round((p.best[l.id] ?? 0) * 100)}%` : skipped ? " · skipped by your placement" : ""}
@@ -257,8 +260,8 @@ function BlockView({ b }: { b: Block }) {
       return <h2 className="mt-4 text-2xl font-extrabold">{b.text}</h2>;
     case "analogy":
       return (
-        <aside className="border-net bg-net/10 rounded-2xl border-l-[6px] px-5 py-4">
-          <p className="text-net font-mono text-xs font-bold tracking-wide uppercase">Think of it like this</p>
+        <aside className="border-main bg-main/10 rounded-2xl border-l-[6px] px-5 py-4">
+          <p className="text-main font-mono text-xs font-bold tracking-wide uppercase">Think of it like this</p>
           <p className="mt-1 text-[17px] leading-relaxed">
             <Rich text={b.text} />
           </p>
@@ -466,7 +469,7 @@ export function Start() {
   };
   return (
     <div className={cn(wrap, "max-w-2xl py-10")}>
-      <Tag className="bg-sun text-[#16141d]">Starting point</Tag>
+      <Tag className="bg-sun text-[#471f28]">Starting point</Tag>
       <h1 className="mt-3 text-4xl font-extrabold">Where should you begin?</h1>
       {res ? (
         <div className="chunk pop mt-6 p-6">
@@ -577,31 +580,24 @@ function Cards() {
 }
 
 function QuickQuiz() {
-  const p = useProgress();
-  const [round, setRound] = useState(0);
+  const [seed, setSeed] = useState(() => 1000 + Math.floor(Math.random() * 9000));
   const [score, setScore] = useState<number | null>(null);
-  const qs = useMemo(() => {
-    const mine = allQuestions.filter((q) => p.done[q.lesson.id]);
-    const pool = mine.length >= 5 ? mine : allQuestions;
-    return pool
-      .map((q) => [Math.random(), q] as const)
-      .sort((a, b) => a[0] - b[0])
-      .slice(0, 10)
-      .map(([, q]) => q);
-  }, [round]); // eslint-disable-line react-hooks/exhaustive-deps
+  // every quiz has a number; the same number always gives the same ten questions, so a friend can take the same one
+  const qs = useMemo(() => seededQuestions(seed), [seed]);
   return (
     <div className="chunk p-5 sm:p-7">
       {score === null ? (
-        <Quiz key={round} questions={qs} onDone={(s) => setScore(s)} doneLabel="See my score" />
+        <Quiz key={seed} questions={qs} onDone={(s) => setScore(s)} doneLabel="See my score" />
       ) : (
         <div className="pop">
           <h2 className="text-3xl font-extrabold">
             {Math.round(score * qs.length)} of {qs.length} right
           </h2>
           <p className="text-soft mt-2">{score === 1 ? "Clean sweep." : "Each explanation told you why. Another round uses a fresh mix."}</p>
-          <Btn className="mt-4" onClick={() => (setScore(null), setRound(round + 1))}>
+          <Btn className="mt-4" onClick={() => (setScore(null), setSeed(1000 + Math.floor(Math.random() * 9000)))}>
             Another round <Arrow />
           </Btn>
+          <ChallengeInvite seed={seed} right={Math.round(score * qs.length)} total={qs.length} />
         </div>
       )}
     </div>
@@ -644,13 +640,18 @@ export function Me() {
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {badges.map(([name, how, got]) => (
           <div key={name} className={cn("flex items-center gap-3 rounded-2xl border-2 p-3.5", got ? "border-edge bg-card shadow-[4px_4px_0_var(--drop)]" : "border-line border-dashed")}>
-            <span className={cn("grid size-11 shrink-0 place-items-center rounded-full border-2", got ? "border-edge bg-sun text-[#16141d]" : "border-line text-soft")}>{got ? <Check /> : "?"}</span>
+            <span className={cn("grid size-11 shrink-0 place-items-center rounded-full border-2", got ? "border-edge bg-sun text-[#471f28]" : "border-line text-soft")}>{got ? <Check /> : "?"}</span>
             <span>
               <span className={cn("block font-bold", !got && "text-soft")}>{name}</span>
               <span className="text-soft block text-sm">{how}</span>
             </span>
           </div>
         ))}
+      </div>
+
+      <h2 className="mt-10 text-2xl font-extrabold">Share it</h2>
+      <div className="mt-4">
+        <ShareCard />
       </div>
 
       <h2 className="mt-10 text-2xl font-extrabold">By stage</h2>
@@ -704,7 +705,7 @@ export function PathPlan({ id }: { id: string }) {
   if (!path || !path.outline) return <Missing />;
   return (
     <div className={cn(wrap, "max-w-3xl py-10")}>
-      <Tag className={path.color === "cloud" ? "bg-cloud text-[#16141d]" : "bg-ai text-ai-ink"}>Being built</Tag>
+      <Tag className={path.color === "cloud" ? "bg-cloud text-[#471f28]" : "bg-ai text-ai-ink"}>Being built</Tag>
       <h1 className="mt-3 text-4xl font-extrabold sm:text-5xl">{path.name}</h1>
       <p className="text-soft mt-2 max-w-[60ch]">{path.goal} This path is planned and not written yet. Here is what it will cover.</p>
       <ol className="mt-6 grid gap-2">
